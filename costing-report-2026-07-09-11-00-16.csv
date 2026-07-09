@@ -1,0 +1,78 @@
+Assigned To	Lead Status	Costing Status	Total Leads	Total Offer Price
+Aashu 	pending	done	2	4978100
+Aashu 	pending	in_progress	1	36714275
+Aashu 	pending	pending	4	654654
+Aashu 	pending	revised_offer_submitted	1	708700
+Aashu 	under_negotiation	done	1	1447100
+Aashu 	won	done	1	282900
+Aashu  Subtotal			10	44785729
+Aayushi 	pending	done	4	27158435
+Aayushi 	pending	pending	4	0
+Aayushi 	pending	revised_offer_submitted	3	153132944
+Aayushi 	technical_qualification_passed	pending	1	0
+Aayushi 	won	done	1	295000
+Aayushi 	won	pending	1	328000
+Aayushi 	won	revised_offer_submitted	3	16147763
+Aayushi  Subtotal			17	197062142
+Aditya Soni	quoted	done	5	5322990
+Aditya Soni Subtotal			5	5322990
+Akhilesh	pending	done	3	35606939
+Akhilesh	pending	pending	2	0
+Akhilesh	pending	revised_offer_submitted	2	23954847
+Akhilesh	pending	revision_in_progress	1	5788917
+Akhilesh	quoted	done	3	6626795
+Akhilesh	under_negotiation	revised_offer_submitted	1	10441500
+Akhilesh	won	done	2	2015000
+Akhilesh	won	revised_offer_submitted	3	4174800
+Akhilesh Subtotal			17	88608798
+Amit Gautam	quoted	done	1	7700000
+Amit Gautam	won	done	1	1825000
+Amit Gautam	won	pending	1	800000
+Amit Gautam Subtotal			3	10325000
+Anil Yadav	pending	pending	1	0
+Anil Yadav	pending	technical_query	1	11085500
+Anil Yadav	quoted	done	6	19953851
+Anil Yadav	quoted	revised_offer_submitted	3	9988100
+Anil Yadav	technical_qualification_passed	negotiating_with_vendor	1	263500
+Anil Yadav	won	done	1	859320
+Anil Yadav	won	negotiating_with_vendor	1	714910
+Anil Yadav	won	revised_offer_submitted	4	7853420
+Anil Yadav Subtotal			18	50718601
+Bharat	pending	done	2	8536851
+Bharat	quoted	done	2	11553600
+Bharat	quoted	pending	1	0
+Bharat Subtotal			5	20090451
+Deepak Janyani	lost	done	1	14158700
+Deepak Janyani	lost	pending	1	0
+Deepak Janyani	pending	done	1	3683200
+Deepak Janyani	pending	pending	1	0
+Deepak Janyani	pending	revised_offer_submitted	2	89139051
+Deepak Janyani	quoted	done	11	138138434
+Deepak Janyani	won	done	1	379998
+Deepak Janyani Subtotal			18	245499383
+Deepesh	pending	pending	11	0
+Deepesh	quoted	pending	2	0
+Deepesh	under_negotiation	pending	2	0
+Deepesh Subtotal			15	0
+mohan shyam	quoted	pending	10	0
+mohan shyam	won	pending	8	14635708
+mohan shyam Subtotal			18	14635708
+Pavan Kumar	pending	pending	1	0
+Pavan Kumar	quoted	done	1	1033334
+Pavan Kumar Subtotal			2	1033334
+Rakesh	lost	done	1	0
+Rakesh	lost	pending	1	0
+Rakesh	pending	done	9	252719679.2
+Rakesh	pending	pending	5	0
+Rakesh	pending	revised_offer_submitted	3	23272341
+Rakesh	quoted	done	3	56663400
+Rakesh	under_negotiation	done	2	75408422
+Rakesh	won	pending	1	0
+Rakesh	won	revised_offer_submitted	1	44460060
+Rakesh Subtotal			26	452523902.2
+RamKrishna Pandey	pending	done	3	27446875
+RamKrishna Pandey	quoted	revised_offer_submitted	1	4800000
+RamKrishna Pandey Subtotal			4	32246875
+vikram	under_negotiation	negotiating_with_vendor	1	10000
+vikram Subtotal			1	10000
+Grand Total			159	1162862913
