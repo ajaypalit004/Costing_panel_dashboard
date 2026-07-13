@@ -87,7 +87,7 @@ export default function Dashboard() {
   }, [leads, selectedMonth, selectedEngineer, selectedSalesPerson]);
 
   // Compute KPIs & Charts dynamically based on new rules
-  const { kpiData, engineerPerformance, engineerValueData, clientSummary, leadAgeing } = useMemo(() => {
+  const { kpiData, engineerPerformance, salesData, clientSummary, leadAgeing } = useMemo(() => {
     
     let totalAssigned = 0;
     let pending = 0;
