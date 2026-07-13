@@ -149,8 +149,7 @@ export default function Dashboard() {
 
     const formattedClientSummary = filteredLeads
       .map(c => ({ ...c, displayValue: formatMoney(c.offerPrice) }))
-      .sort((a, b) => b.daysOpen - a.daysOpen)
-      .slice(0, 10);
+      .sort((a, b) => b.daysOpen - a.daysOpen);
 
     const ageingArray = [
       { range: '0–2 Days', count: ageingCounts['0-2 Days'] },
