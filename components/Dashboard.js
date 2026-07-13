@@ -96,6 +96,7 @@ export default function Dashboard() {
 
     const engMap = {};
     const salesMap = {};
+    const monthMap = {};
     const ageingCounts = { '0-2 Days': 0, '3-5 Days': 0, '6-10 Days': 0, '>10 Days': 0 };
 
     filteredLeads.forEach(lead => {
@@ -108,7 +109,12 @@ export default function Dashboard() {
       const isCompleted = !isPending;
 
       if (isPending) pending += 1;
-      if (isCompleted) completed += 1;
+      if (isCompleted) {
+        completed += 1;
+        if (lead.monthYear) {
+          monthMap[lead.monthYear] = (monthMap[lead.monthYear] || 0) + 1;
+        }
+      }
 
       // Engineer aggregations
       if (!engMap[lead.engineer]) {
@@ -153,12 +159,15 @@ export default function Dashboard() {
       { range: '>10 Days', count: ageingCounts['>10 Days'] },
     ];
 
+    const numMonths = Object.keys(monthMap).length || 1;
+    const avgCostingPerMonth = Math.round(completed / numMonths);
+
     return {
       kpiData: {
         totalAssigned,
         pending,
         topEngineer,
-        avgTat: '2.4 Days', // Mocked as Excel lacks timestamps for completion
+        avgCostingPerMonth,
         totalQuoteValue: formatMoney(totalQuoteValue)
       },
       engineerPerformance: perfArray,
@@ -223,7 +232,7 @@ export default function Dashboard() {
         <KpiCard title="Assigned" value={kpiData.totalAssigned} icon={FileText} colorClass="bg-blue-500" />
         <KpiCard title="Pending" value={kpiData.pending} icon={Clock} colorClass="bg-amber-500" />
         <KpiCard title="Top Performer" value={kpiData.topEngineer} icon={UserCheck} colorClass="bg-emerald-500" />
-        <KpiCard title="Avg TAT" value={kpiData.avgTat} icon={TrendingUp} colorClass="bg-purple-500" />
+        <KpiCard title="Avg Costing/Mo" value={kpiData.avgCostingPerMonth} icon={TrendingUp} colorClass="bg-purple-500" />
         <KpiCard title="Total Quote" value={kpiData.totalQuoteValue} icon={IndianRupee} colorClass="bg-pink-500" />
       </div>
 
