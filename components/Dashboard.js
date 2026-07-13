@@ -294,40 +294,20 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* --- BOTTOM ROW: Ageing + Client Table --- */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      {/* --- BOTTOM ROW: Client Table --- */}
+      <div className="grid grid-cols-1 gap-6">
         
-        {/* Lead Type */}
-        <div className="lg:col-span-1 space-y-6">
-          
-          <div className="glass-card">
-            <h3 className="text-lg font-semibold text-white mb-2">Lead Type Breakdown</h3>
-            <div className="h-40 flex justify-center items-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={leadTypeData} cx="50%" cy="50%" innerRadius={40} outerRadius={60} paddingAngle={5} dataKey="value" stroke="none">
-                    {leadTypeData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc', borderRadius: '8px' }} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-
         {/* Client Summary Table */}
-        <div className="glass-card lg:col-span-3 overflow-auto">
+        <div className="glass-card overflow-auto h-[400px]">
           <h3 className="text-lg font-semibold text-white mb-4">Client Summary (Live Tracking)</h3>
-          <table className="w-full text-left text-sm text-slate-300 whitespace-nowrap">
+          <table className="w-full text-left text-sm text-slate-300">
             <thead className="text-xs uppercase bg-slate-800/50 text-slate-400 sticky top-0">
               <tr>
                 <th className="px-4 py-3 rounded-tl-lg">Client</th>
                 <th className="px-4 py-3">Value</th>
                 <th className="px-4 py-3">Costing Eng</th>
-                <th className="px-4 py-3">Costing Status</th>
-                <th className="px-4 py-3 rounded-tr-lg">Age (Days)</th>
+                <th className="px-4 py-3">Lead Person</th>
+                <th className="px-4 py-3 rounded-tr-lg">Costing Status</th>
               </tr>
             </thead>
             <tbody>
@@ -338,16 +318,12 @@ export default function Dashboard() {
                     <td className="px-4 py-3 font-medium text-white">{client.client}</td>
                     <td className="px-4 py-3 text-blue-400 font-medium">{client.displayValue}</td>
                     <td className="px-4 py-3 text-white">{client.engineer}</td>
+                    <td className="px-4 py-3 text-white">{client.salesPerson}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
                         !isPending ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
                       }`}>
                         {!isPending ? 'Completed' : 'Pending'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={client.daysOpen > 10 ? 'text-rose-400 font-bold' : ''}>
-                        {client.daysOpen} d
                       </span>
                     </td>
                   </tr>
