@@ -1,6 +1,6 @@
 const XLSX = require('xlsx');
 
-const workbook = XLSX.readFile('leads-report-20260709-104204.xlsx');
+const workbook = XLSX.readFile('nn.xlsx');
 const sheetName = workbook.SheetNames[0];
 const worksheet = workbook.Sheets[sheetName];
 const data = XLSX.utils.sheet_to_json(worksheet, { defval: "" });

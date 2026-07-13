@@ -13,7 +13,7 @@ function excelDateToJSDate(serial) {
 
 export async function GET() {
   try {
-    const filePath = path.join(process.cwd(), 'leads-report-20260709-104204.xlsx');
+    const filePath = path.join(process.cwd(), 'nn.xlsx');
     const fileBuffer = fs.readFileSync(filePath);
     const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
@@ -23,6 +23,7 @@ export async function GET() {
 
     data.forEach(row => {
       const assignedTo = String(row['Assigned To'] || '').trim();
+      const salesPerson = String(row['Sales Person'] || '').trim();
       const currentStatus = String(row['Current Status'] || '').trim().toLowerCase();
       const costingStatus = String(row['Costing Status'] || '').trim().toLowerCase();
       const offerPrice = parseFloat(row['Offer Price']) || 0;
@@ -40,6 +41,7 @@ export async function GET() {
         id: row.ID || Math.random(),
         client: customer || 'Unknown',
         engineer: assignedTo,
+        salesPerson: salesPerson || 'Unassigned',
         currentStatus,
         costingStatus,
         offerPrice,

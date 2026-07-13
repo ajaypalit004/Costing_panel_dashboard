@@ -45,6 +45,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState('All');
   const [selectedEngineer, setSelectedEngineer] = useState('All');
+  const [selectedSalesPerson, setSelectedSalesPerson] = useState('All');
 
   React.useEffect(() => {
     fetch('/api/dashboard-data')
@@ -70,14 +71,20 @@ export default function Dashboard() {
     return ['All', ...e];
   }, [leads]);
 
+  const salesPersons = useMemo(() => {
+    const s = Array.from(new Set(leads.map(l => l.salesPerson))).sort();
+    return ['All', ...s];
+  }, [leads]);
+
   // Apply filters
   const filteredLeads = useMemo(() => {
     return leads.filter(l => {
       const matchMonth = selectedMonth === 'All' || l.monthYear === selectedMonth;
       const matchEng = selectedEngineer === 'All' || l.engineer === selectedEngineer;
-      return matchMonth && matchEng;
+      const matchSales = selectedSalesPerson === 'All' || l.salesPerson === selectedSalesPerson;
+      return matchMonth && matchEng && matchSales;
     });
-  }, [leads, selectedMonth, selectedEngineer]);
+  }, [leads, selectedMonth, selectedEngineer, selectedSalesPerson]);
 
   // Compute KPIs & Charts dynamically based on new rules
   const { kpiData, engineerPerformance, engineerValueData, clientSummary, leadAgeing } = useMemo(() => {
@@ -88,6 +95,7 @@ export default function Dashboard() {
     let totalQuoteValue = 0;
 
     const engMap = {};
+    const salesMap = {};
     const ageingCounts = { '0-2 Days': 0, '3-5 Days': 0, '6-10 Days': 0, '>10 Days': 0 };
 
     filteredLeads.forEach(lead => {
@@ -105,13 +113,21 @@ export default function Dashboard() {
       // Engineer aggregations
       if (!engMap[lead.engineer]) {
         engMap[lead.engineer] = {
-          name: lead.engineer, assigned: 0, completed: 0, pending: 0, totalValue: 0, tat: (Math.random() * (3.5 - 1.5) + 1.5).toFixed(1)
+          name: lead.engineer, assigned: 0, completed: 0, pending: 0, totalValue: 0
         };
       }
       engMap[lead.engineer].assigned += 1;
       engMap[lead.engineer].totalValue += lead.offerPrice;
       if (isCompleted) engMap[lead.engineer].completed += 1;
       if (isPending) engMap[lead.engineer].pending += 1;
+
+      // Sales Person aggregations
+      if (!salesMap[lead.salesPerson]) {
+        salesMap[lead.salesPerson] = {
+          name: lead.salesPerson, count: 0
+        };
+      }
+      salesMap[lead.salesPerson].count += 1;
 
       // Ageing
       if (lead.daysOpen <= 2) ageingCounts['0-2 Days']++;
@@ -121,7 +137,7 @@ export default function Dashboard() {
     });
 
     const perfArray = Object.values(engMap).sort((a, b) => b.completed - a.completed);
-    const valueArray = Object.values(engMap).sort((a, b) => b.totalValue - a.totalValue);
+    const salesArray = Object.values(salesMap).sort((a, b) => b.count - a.count);
     
     const topEngineer = perfArray.length > 0 ? perfArray[0].name : '-';
 
@@ -146,7 +162,7 @@ export default function Dashboard() {
         totalQuoteValue: formatMoney(totalQuoteValue)
       },
       engineerPerformance: perfArray,
-      engineerValueData: valueArray,
+      salesData: salesArray,
       clientSummary: formattedClientSummary,
       leadAgeing: ageingArray
     };
@@ -188,6 +204,17 @@ export default function Dashboard() {
               {engineers.map(e => <option key={e} value={e}>{e}</option>)}
             </select>
           </div>
+
+          <div className="glass-card py-2 px-4 flex items-center space-x-2">
+            <span className="text-slate-400 text-sm">Sales Person:</span>
+            <select 
+              value={selectedSalesPerson} 
+              onChange={e => setSelectedSalesPerson(e.target.value)}
+              className="bg-slate-800 text-white text-sm rounded border border-slate-600 px-2 py-1 outline-none focus:border-blue-500"
+            >
+              {salesPersons.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
         </div>
       </header>
 
@@ -205,11 +232,11 @@ export default function Dashboard() {
         
         {/* Engineer Performance Table */}
         <div className="glass-card lg:col-span-1 overflow-auto h-[400px]">
-          <h3 className="text-lg font-semibold text-white mb-4">Engineer Capacity</h3>
+          <h3 className="text-lg font-semibold text-white mb-4">Costing Person Status</h3>
           <table className="w-full text-left text-sm text-slate-300">
             <thead className="text-xs uppercase bg-slate-800/50 text-slate-400 sticky top-0">
               <tr>
-                <th className="px-4 py-3 rounded-tl-lg">Engineer</th>
+                <th className="px-4 py-3 rounded-tl-lg">Costing Person</th>
                 <th className="px-4 py-3">Assigned</th>
                 <th className="px-4 py-3">Comp</th>
                 <th className="px-4 py-3">Pend</th>
@@ -231,15 +258,15 @@ export default function Dashboard() {
 
         {/* Lead Status Graph (Stacked) */}
         <div className="glass-card lg:col-span-1 h-[400px]">
-           <h3 className="text-lg font-semibold text-white mb-4">Costing Status by Engineer</h3>
+           <h3 className="text-lg font-semibold text-white mb-4">Costing Status</h3>
            <div className="h-72">
              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={engineerPerformance} margin={{ top: 20, right: 30, left: -20, bottom: 5 }}>
+                <BarChart data={engineerPerformance} margin={{ top: 20, right: 30, left: -20, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} angle={-45} textAnchor="end" height={60} />
+                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} angle={-45} textAnchor="end" height={90} interval={0} />
                   <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                   <RechartsTooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc', borderRadius: '8px' }} />
-                  <Legend wrapperStyle={{ fontSize: '12px' }} />
+                  <Legend wrapperStyle={{ fontSize: '12px', bottom: 0 }} />
                   <Bar dataKey="completed" stackId="a" fill="#10b981" name="Completed" radius={[0, 0, 4, 4]} />
                   <Bar dataKey="pending" stackId="a" fill="#f59e0b" name="Pending" radius={[4, 4, 0, 0]} />
                 </BarChart>
@@ -249,22 +276,18 @@ export default function Dashboard() {
 
         {/* Total Value Graph (New requirement) */}
         <div className="glass-card lg:col-span-1 h-[400px]">
-           <h3 className="text-lg font-semibold text-white mb-4">Quote Value by Engineer</h3>
+           <h3 className="text-lg font-semibold text-white mb-4">Costing per Lead Person</h3>
            <div className="h-72">
              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={engineerValueData} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
+                <BarChart data={salesData} margin={{ top: 20, right: 30, left: -20, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} angle={-45} textAnchor="end" height={60} />
-                  <YAxis 
-                    stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false}
-                    tickFormatter={(value) => `₹${(value / 10000000).toFixed(1)}Cr`}
-                  />
+                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} angle={-45} textAnchor="end" height={90} interval={0} />
+                  <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                   <RechartsTooltip 
                     cursor={{fill: 'rgba(255,255,255,0.05)'}} 
                     contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc', borderRadius: '8px' }} 
-                    formatter={(value) => formatMoney(value)}
                   />
-                  <Bar dataKey="totalValue" fill="#3b82f6" name="Total Value" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="count" fill="#3b82f6" name="Total Costings" radius={[4, 4, 0, 0]} />
                 </BarChart>
              </ResponsiveContainer>
            </div>
@@ -274,27 +297,8 @@ export default function Dashboard() {
       {/* --- BOTTOM ROW: Ageing + Client Table --- */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         
-        {/* Lead Ageing & Type */}
+        {/* Lead Type */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="glass-card">
-            <h3 className="text-lg font-semibold text-white mb-4">Lead Ageing</h3>
-            <div className="space-y-4">
-              {leadAgeing.map((item, idx) => (
-                <div key={idx}>
-                  <div className="flex justify-between text-sm text-slate-300 mb-1">
-                    <span>{item.range}</span>
-                    <span className="font-semibold text-white">{item.count}</span>
-                  </div>
-                  <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full rounded-full ${idx === 2 ? 'bg-amber-500' : idx === 3 ? 'bg-red-500' : 'bg-blue-500'}`} 
-                      style={{ width: `${Math.min((item.count / Math.max(1, filteredLeads.length)) * 100, 100)}%` }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
           
           <div className="glass-card">
             <h3 className="text-lg font-semibold text-white mb-2">Lead Type Breakdown</h3>
