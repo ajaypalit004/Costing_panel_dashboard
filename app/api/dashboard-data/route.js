@@ -16,6 +16,26 @@ function parseDate(val) {
   return isNaN(d.getTime()) ? new Date() : d;
 }
 
+function getSundayWeek(dateObj) {
+  const d = new Date(dateObj);
+  const day = d.getDay(); // 0 is Sunday
+  const sunStart = new Date(d);
+  sunStart.setDate(d.getDate() - day);
+  sunStart.setHours(0, 0, 0, 0);
+
+  const sunEnd = new Date(sunStart);
+  sunEnd.setDate(sunStart.getDate() + 7);
+  sunEnd.setHours(23, 59, 59, 999);
+
+  const startStr = sunStart.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  const endStr = sunEnd.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  return {
+    weekKey: sunStart.toISOString().split('T')[0],
+    weekLabel: `${startStr} – ${endStr}`
+  };
+}
+
 const CANDIDATE_FILES = [
   'costing-report-2026-08-26-09-53-12.csv',
   'nn.xlsx',
@@ -57,6 +77,7 @@ export async function GET() {
       
       // Formatting Month Name (e.g., "April 2026")
       const monthYear = enqDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+      const weekInfo = getSundayWeek(enqDate);
 
       leads.push({
         id: row.ID || Math.random(),
@@ -68,6 +89,8 @@ export async function GET() {
         offerPrice,
         enqDate: enqDate.toISOString(),
         monthYear,
+        weekKey: weekInfo.weekKey,
+        weekLabel: weekInfo.weekLabel,
         daysOpen: daysOpen >= 0 ? daysOpen : 0
       });
     });

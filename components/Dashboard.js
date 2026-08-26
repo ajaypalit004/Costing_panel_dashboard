@@ -43,6 +43,7 @@ const KpiCard = ({ title, value, icon: Icon, colorClass }) => (
 export default function Dashboard() {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedWeek, setSelectedWeek] = useState('All');
   const [selectedMonth, setSelectedMonth] = useState('All');
   const [selectedEngineer, setSelectedEngineer] = useState('All');
   const [selectedSalesPerson, setSelectedSalesPerson] = useState('All');
@@ -61,6 +62,16 @@ export default function Dashboard() {
   }, []);
 
   // Compute unique filter options
+  const weeks = useMemo(() => {
+    const weekMap = new Map();
+    leads.forEach(l => {
+      if (l.weekKey && l.weekLabel) {
+        weekMap.set(l.weekKey, { key: l.weekKey, label: l.weekLabel });
+      }
+    });
+    return Array.from(weekMap.values()).sort((a, b) => b.key.localeCompare(a.key));
+  }, [leads]);
+
   const months = useMemo(() => {
     const m = Array.from(new Set(leads.map(l => l.monthYear))).sort();
     return ['All', ...m];
@@ -78,13 +89,22 @@ export default function Dashboard() {
 
   // Apply filters
   const filteredLeads = useMemo(() => {
+    const latestWeekKey = weeks.length > 0 ? weeks[0].key : null;
+
     return leads.filter(l => {
+      let matchWeek = true;
+      if (selectedWeek === 'LATEST') {
+        matchWeek = l.weekKey === latestWeekKey;
+      } else if (selectedWeek !== 'All') {
+        matchWeek = l.weekKey === selectedWeek;
+      }
+
       const matchMonth = selectedMonth === 'All' || l.monthYear === selectedMonth;
       const matchEng = selectedEngineer === 'All' || l.engineer === selectedEngineer;
       const matchSales = selectedSalesPerson === 'All' || l.salesPerson === selectedSalesPerson;
-      return matchMonth && matchEng && matchSales;
+      return matchWeek && matchMonth && matchEng && matchSales;
     });
-  }, [leads, selectedMonth, selectedEngineer, selectedSalesPerson]);
+  }, [leads, selectedWeek, selectedMonth, selectedEngineer, selectedSalesPerson, weeks]);
 
   // Compute KPIs & Charts dynamically based on new rules
   const { kpiData, engineerPerformance, salesData, clientSummary, leadAgeing } = useMemo(() => {
@@ -184,45 +204,109 @@ export default function Dashboard() {
     <div className="max-w-[1600px] mx-auto space-y-8 pb-10">
       
       {/* Header & Filters */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 space-y-4 md:space-y-0">
+      <header className="flex flex-col xl:flex-row justify-between items-start xl:items-end mb-6 space-y-4 xl:space-y-0 gap-4">
         <div>
-          <h1 className="text-3xl font-bold gradient-text mb-2">Costing Team Dashboard</h1>
-          <p className="text-slate-400">Interactive capacity and efficiency tracking.</p>
+          <div className="flex items-center space-x-3 mb-2">
+            <h1 className="text-3xl font-bold gradient-text">Costing Team Dashboard</h1>
+            <button
+              onClick={() => {
+                setSelectedWeek(selectedWeek === 'LATEST' ? 'All' : 'LATEST');
+                setSelectedMonth('All');
+              }}
+              className={`px-3 py-1 text-xs font-semibold rounded-full border transition-all duration-200 ${
+                selectedWeek === 'LATEST'
+                  ? 'bg-blue-600 border-blue-400 text-white shadow-lg shadow-blue-500/30'
+                  : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:border-blue-500 hover:text-white'
+              }`}
+            >
+              {selectedWeek === 'LATEST' ? '✓ Latest Week Active' : '⚡ Latest Week (Sun–Sun)'}
+            </button>
+          </div>
+          <p className="text-slate-400 text-sm">
+            Interactive capacity and efficiency tracking.
+            {selectedWeek === 'LATEST' && weeks[0] && (
+              <span className="text-blue-400 font-medium ml-2">
+                (Showing: {weeks[0].label})
+              </span>
+            )}
+          </p>
         </div>
         
-        <div className="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-4">
-          <div className="glass-card py-2 px-4 flex items-center space-x-2">
-            <span className="text-slate-400 text-sm">Month:</span>
+        <div className="flex flex-wrap gap-3 items-center">
+          {/* Week Filter (Sunday to Sunday) */}
+          <div className="glass-card py-2 px-3 flex items-center space-x-2">
+            <span className="text-slate-400 text-xs font-medium uppercase">Week (Sun–Sun):</span>
+            <select 
+              value={selectedWeek} 
+              onChange={e => {
+                setSelectedWeek(e.target.value);
+                if (e.target.value !== 'All') setSelectedMonth('All');
+              }}
+              className="bg-slate-800 text-white text-xs rounded border border-slate-600 px-2 py-1 outline-none focus:border-blue-500"
+            >
+              <option value="All">All Weeks</option>
+              {weeks.length > 0 && (
+                <option value="LATEST">⚡ Latest Week ({weeks[0].label})</option>
+              )}
+              {weeks.map(w => (
+                <option key={w.key} value={w.key}>{w.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Month Filter */}
+          <div className="glass-card py-2 px-3 flex items-center space-x-2">
+            <span className="text-slate-400 text-xs font-medium uppercase">Month:</span>
             <select 
               value={selectedMonth} 
-              onChange={e => setSelectedMonth(e.target.value)}
-              className="bg-slate-800 text-white text-sm rounded border border-slate-600 px-2 py-1 outline-none focus:border-blue-500"
+              onChange={e => {
+                setSelectedMonth(e.target.value);
+                if (e.target.value !== 'All') setSelectedWeek('All');
+              }}
+              className="bg-slate-800 text-white text-xs rounded border border-slate-600 px-2 py-1 outline-none focus:border-blue-500"
             >
               {months.map(m => <option key={m} value={m}>{m}</option>)}
             </select>
           </div>
           
-          <div className="glass-card py-2 px-4 flex items-center space-x-2">
-            <span className="text-slate-400 text-sm">Costing Engineer:</span>
+          {/* Costing Engineer Filter */}
+          <div className="glass-card py-2 px-3 flex items-center space-x-2">
+            <span className="text-slate-400 text-xs font-medium uppercase">Costing Eng:</span>
             <select 
               value={selectedEngineer} 
               onChange={e => setSelectedEngineer(e.target.value)}
-              className="bg-slate-800 text-white text-sm rounded border border-slate-600 px-2 py-1 outline-none focus:border-blue-500"
+              className="bg-slate-800 text-white text-xs rounded border border-slate-600 px-2 py-1 outline-none focus:border-blue-500"
             >
               {engineers.map(e => <option key={e} value={e}>{e}</option>)}
             </select>
           </div>
 
-          <div className="glass-card py-2 px-4 flex items-center space-x-2">
-            <span className="text-slate-400 text-sm">Sales Person:</span>
+          {/* Sales Person Filter */}
+          <div className="glass-card py-2 px-3 flex items-center space-x-2">
+            <span className="text-slate-400 text-xs font-medium uppercase">Sales Person:</span>
             <select 
               value={selectedSalesPerson} 
               onChange={e => setSelectedSalesPerson(e.target.value)}
-              className="bg-slate-800 text-white text-sm rounded border border-slate-600 px-2 py-1 outline-none focus:border-blue-500"
+              className="bg-slate-800 text-white text-xs rounded border border-slate-600 px-2 py-1 outline-none focus:border-blue-500"
             >
               {salesPersons.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
+
+          {/* Reset Filters button if any filter active */}
+          {(selectedWeek !== 'All' || selectedMonth !== 'All' || selectedEngineer !== 'All' || selectedSalesPerson !== 'All') && (
+            <button
+              onClick={() => {
+                setSelectedWeek('All');
+                setSelectedMonth('All');
+                setSelectedEngineer('All');
+                setSelectedSalesPerson('All');
+              }}
+              className="text-xs text-slate-400 hover:text-rose-400 px-2 py-1 transition-colors"
+            >
+              Reset Filters ✕
+            </button>
+          )}
         </div>
       </header>
 
