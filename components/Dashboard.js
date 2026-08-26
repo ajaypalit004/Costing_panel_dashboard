@@ -29,13 +29,13 @@ const leadTypeData = [
 
 // --- COMPONENTS ---
 const KpiCard = ({ title, value, icon: Icon, colorClass }) => (
-  <div className="glass-card flex items-center justify-between p-5 hover:scale-105 transition-transform duration-300">
-    <div>
-      <p className="text-slate-400 text-sm font-medium mb-1 uppercase tracking-wider">{title}</p>
-      <h3 className="text-2xl font-bold text-white">{value}</h3>
+  <div className="glass-card flex items-center justify-between p-3.5 hover:scale-[1.02] transition-all duration-200">
+    <div className="min-w-0 pr-2">
+      <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider truncate mb-0.5">{title}</p>
+      <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight truncate">{value}</h3>
     </div>
-    <div className={`p-3 rounded-full ${colorClass} bg-opacity-20`}>
-      <Icon className={`w-6 h-6 ${colorClass.replace('bg-', 'text-')}`} />
+    <div className={`p-2.5 rounded-xl ${colorClass} bg-opacity-20 shrink-0`}>
+      <Icon className={`w-5 h-5 ${colorClass.replace('bg-', 'text-')}`} />
     </div>
   </div>
 );
@@ -201,99 +201,99 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="max-w-[1600px] mx-auto space-y-8 pb-10">
+    <div className="max-w-[1700px] mx-auto space-y-4 pb-4">
       
       {/* Header & Filters */}
-      <header className="flex flex-col xl:flex-row justify-between items-start xl:items-end mb-6 space-y-4 xl:space-y-0 gap-4">
+      <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 glass-card p-3 md:p-4">
         <div>
-          <div className="flex items-center space-x-3 mb-2">
-            <h1 className="text-3xl font-bold gradient-text">Costing Team Dashboard</h1>
+          <div className="flex items-center space-x-3">
+            <h1 className="text-xl md:text-2xl font-bold gradient-text">Costing Team Dashboard</h1>
             <button
               onClick={() => {
                 setSelectedWeek(selectedWeek === 'LATEST' ? 'All' : 'LATEST');
                 setSelectedMonth('All');
               }}
-              className={`px-3 py-1 text-xs font-semibold rounded-full border transition-all duration-200 ${
+              className={`px-2.5 py-1 text-xs font-semibold rounded-full border transition-all duration-200 ${
                 selectedWeek === 'LATEST'
-                  ? 'bg-blue-600 border-blue-400 text-white shadow-lg shadow-blue-500/30'
-                  : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:border-blue-500 hover:text-white'
+                  ? 'bg-blue-600 border-blue-400 text-white shadow-md shadow-blue-500/30'
+                  : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-blue-500 hover:text-white'
               }`}
             >
-              {selectedWeek === 'LATEST' ? '✓ Latest Week Active' : '⚡ Latest Week (Sun–Sun)'}
+              {selectedWeek === 'LATEST' ? '✓ Latest Week' : '⚡ Latest Week (Sun–Sun)'}
             </button>
           </div>
-          <p className="text-slate-400 text-sm">
-            Interactive capacity and efficiency tracking.
+          <p className="text-slate-400 text-xs mt-0.5">
+            Capacity & efficiency tracking
             {selectedWeek === 'LATEST' && weeks[0] && (
-              <span className="text-blue-400 font-medium ml-2">
-                (Showing: {weeks[0].label})
+              <span className="text-blue-400 font-medium ml-1.5">
+                • {weeks[0].label} ({filteredLeads.length} leads)
               </span>
             )}
           </p>
         </div>
         
-        <div className="flex flex-wrap gap-3 items-center">
+        <div className="flex flex-wrap gap-2 items-center">
           {/* Week Filter (Sunday to Sunday) */}
-          <div className="glass-card py-2 px-3 flex items-center space-x-2">
-            <span className="text-slate-400 text-xs font-medium uppercase">Week (Sun–Sun):</span>
+          <div className="bg-slate-900/80 border border-slate-700/60 rounded-lg py-1.5 px-2.5 flex items-center space-x-1.5">
+            <span className="text-slate-400 text-[11px] font-semibold uppercase tracking-wider">Week:</span>
             <select 
               value={selectedWeek} 
               onChange={e => {
                 setSelectedWeek(e.target.value);
                 if (e.target.value !== 'All') setSelectedMonth('All');
               }}
-              className="bg-slate-800 text-white text-xs rounded border border-slate-600 px-2 py-1 outline-none focus:border-blue-500"
+              className="bg-transparent text-white text-xs outline-none cursor-pointer"
             >
-              <option value="All">All Weeks</option>
+              <option value="All" className="bg-slate-900 text-white">All Weeks</option>
               {weeks.length > 0 && (
-                <option value="LATEST">⚡ Latest Week ({weeks[0].label})</option>
+                <option value="LATEST" className="bg-slate-900 text-blue-400">⚡ Latest Week ({weeks[0].label})</option>
               )}
               {weeks.map(w => (
-                <option key={w.key} value={w.key}>{w.label}</option>
+                <option key={w.key} value={w.key} className="bg-slate-900 text-white">{w.label}</option>
               ))}
             </select>
           </div>
 
           {/* Month Filter */}
-          <div className="glass-card py-2 px-3 flex items-center space-x-2">
-            <span className="text-slate-400 text-xs font-medium uppercase">Month:</span>
+          <div className="bg-slate-900/80 border border-slate-700/60 rounded-lg py-1.5 px-2.5 flex items-center space-x-1.5">
+            <span className="text-slate-400 text-[11px] font-semibold uppercase tracking-wider">Month:</span>
             <select 
               value={selectedMonth} 
               onChange={e => {
                 setSelectedMonth(e.target.value);
                 if (e.target.value !== 'All') setSelectedWeek('All');
               }}
-              className="bg-slate-800 text-white text-xs rounded border border-slate-600 px-2 py-1 outline-none focus:border-blue-500"
+              className="bg-transparent text-white text-xs outline-none cursor-pointer"
             >
-              {months.map(m => <option key={m} value={m}>{m}</option>)}
+              {months.map(m => <option key={m} value={m} className="bg-slate-900 text-white">{m}</option>)}
             </select>
           </div>
           
           {/* Costing Engineer Filter */}
-          <div className="glass-card py-2 px-3 flex items-center space-x-2">
-            <span className="text-slate-400 text-xs font-medium uppercase">Costing Eng:</span>
+          <div className="bg-slate-900/80 border border-slate-700/60 rounded-lg py-1.5 px-2.5 flex items-center space-x-1.5">
+            <span className="text-slate-400 text-[11px] font-semibold uppercase tracking-wider">Costing Eng:</span>
             <select 
               value={selectedEngineer} 
               onChange={e => setSelectedEngineer(e.target.value)}
-              className="bg-slate-800 text-white text-xs rounded border border-slate-600 px-2 py-1 outline-none focus:border-blue-500"
+              className="bg-transparent text-white text-xs outline-none cursor-pointer"
             >
-              {engineers.map(e => <option key={e} value={e}>{e}</option>)}
+              {engineers.map(e => <option key={e} value={e} className="bg-slate-900 text-white">{e}</option>)}
             </select>
           </div>
 
           {/* Sales Person Filter */}
-          <div className="glass-card py-2 px-3 flex items-center space-x-2">
-            <span className="text-slate-400 text-xs font-medium uppercase">Sales Person:</span>
+          <div className="bg-slate-900/80 border border-slate-700/60 rounded-lg py-1.5 px-2.5 flex items-center space-x-1.5">
+            <span className="text-slate-400 text-[11px] font-semibold uppercase tracking-wider">Sales:</span>
             <select 
               value={selectedSalesPerson} 
               onChange={e => setSelectedSalesPerson(e.target.value)}
-              className="bg-slate-800 text-white text-xs rounded border border-slate-600 px-2 py-1 outline-none focus:border-blue-500"
+              className="bg-transparent text-white text-xs outline-none cursor-pointer"
             >
-              {salesPersons.map(s => <option key={s} value={s}>{s}</option>)}
+              {salesPersons.map(s => <option key={s} value={s} className="bg-slate-900 text-white">{s}</option>)}
             </select>
           </div>
 
-          {/* Reset Filters button if any filter active */}
+          {/* Reset Filters button */}
           {(selectedWeek !== 'All' || selectedMonth !== 'All' || selectedEngineer !== 'All' || selectedSalesPerson !== 'All') && (
             <button
               onClick={() => {
@@ -302,16 +302,16 @@ export default function Dashboard() {
                 setSelectedEngineer('All');
                 setSelectedSalesPerson('All');
               }}
-              className="text-xs text-slate-400 hover:text-rose-400 px-2 py-1 transition-colors"
+              className="text-xs text-rose-400 hover:text-rose-300 font-medium px-2 py-1 transition-colors"
             >
-              Reset Filters ✕
+              Reset ✕
             </button>
           )}
         </div>
       </header>
 
       {/* --- TOP ROW: KPI Summary --- */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
         <KpiCard title="Assigned" value={kpiData.totalAssigned} icon={FileText} colorClass="bg-blue-500" />
         <KpiCard title="Pending" value={kpiData.pending} icon={Clock} colorClass="bg-amber-500" />
         <KpiCard title="Top Performer" value={kpiData.topEngineer} icon={UserCheck} colorClass="bg-emerald-500" />
@@ -320,100 +320,120 @@ export default function Dashboard() {
       </div>
 
       {/* --- MIDDLE ROW: Performance + Lead Status Graph + Total Value Graph --- */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         
-        {/* Engineer Performance Table */}
-        <div className="glass-card lg:col-span-1 overflow-auto h-[400px]">
-          <h3 className="text-lg font-semibold text-white mb-4">Costing Person Status</h3>
-          <table className="w-full text-left text-sm text-slate-300">
-            <thead className="text-xs uppercase bg-slate-800/50 text-slate-400 sticky top-0">
-              <tr>
-                <th className="px-4 py-3 rounded-tl-lg">Costing Person</th>
-                <th className="px-4 py-3">Assigned</th>
-                <th className="px-4 py-3">Comp</th>
-                <th className="px-4 py-3">Pend</th>
-              </tr>
-            </thead>
-            <tbody>
-              {engineerPerformance.map((eng, idx) => (
-                <tr key={idx} className="border-b border-slate-700/50 hover:bg-slate-800/30">
-                  <td className="px-4 py-3 font-medium text-white">{eng.name}</td>
-                  <td className="px-4 py-3">{eng.assigned}</td>
-                  <td className="px-4 py-3 text-emerald-400">{eng.completed}</td>
-                  <td className="px-4 py-3 text-amber-400">{eng.pending}</td>
+        {/* Costing Person Status Table */}
+        <div className="glass-card flex flex-col p-4 h-[350px]">
+          <div className="flex justify-between items-center mb-2.5 pb-2 border-b border-slate-700/50">
+            <h3 className="text-sm font-semibold text-white tracking-wide">Costing Person Status</h3>
+            <span className="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded-full">
+              {engineerPerformance.length} Persons
+            </span>
+          </div>
+          
+          <div className="flex-1 overflow-auto rounded-lg border border-slate-700/40">
+            <table className="w-full text-left text-xs text-slate-300">
+              <thead className="text-[11px] uppercase bg-slate-900 text-slate-400 sticky top-0 z-10 border-b border-slate-700/80 shadow-sm">
+                <tr>
+                  <th className="px-3 py-2 bg-slate-900 font-semibold">Costing Person</th>
+                  <th className="px-2 py-2 bg-slate-900 font-semibold text-center">Assigned</th>
+                  <th className="px-2 py-2 bg-slate-900 font-semibold text-center">Comp</th>
+                  <th className="px-2 py-2 bg-slate-900 font-semibold text-center">Pend</th>
                 </tr>
-              ))}
-              {engineerPerformance.length === 0 && <tr><td colSpan="4" className="text-center py-6 text-slate-500">No data found</td></tr>}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60">
+                {engineerPerformance.map((eng, idx) => (
+                  <tr key={idx} className="hover:bg-slate-800/40 transition-colors">
+                    <td className="px-3 py-1.5 font-medium text-white">{eng.name}</td>
+                    <td className="px-2 py-1.5 text-center font-mono">{eng.assigned}</td>
+                    <td className="px-2 py-1.5 text-center font-mono font-medium text-emerald-400">{eng.completed}</td>
+                    <td className="px-2 py-1.5 text-center font-mono font-medium text-amber-400">{eng.pending}</td>
+                  </tr>
+                ))}
+                {engineerPerformance.length === 0 && (
+                  <tr><td colSpan="4" className="text-center py-6 text-slate-500">No data found</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Lead Status Graph (Stacked) */}
-        <div className="glass-card lg:col-span-1 h-[400px]">
-           <h3 className="text-lg font-semibold text-white mb-4">Costing Status</h3>
-           <div className="h-72">
-             <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={engineerPerformance} margin={{ top: 20, right: 30, left: -20, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} angle={-45} textAnchor="end" height={90} interval={0} />
-                  <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                  <RechartsTooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc', borderRadius: '8px' }} />
-                  <Legend wrapperStyle={{ fontSize: '12px', bottom: 0 }} />
-                  <Bar dataKey="completed" stackId="a" fill="#10b981" name="Completed" radius={[0, 0, 4, 4]} />
-                  <Bar dataKey="pending" stackId="a" fill="#f59e0b" name="Pending" radius={[4, 4, 0, 0]} />
-                </BarChart>
-             </ResponsiveContainer>
-           </div>
+        <div className="glass-card flex flex-col p-4 h-[350px]">
+          <div className="flex justify-between items-center mb-2.5 pb-2 border-b border-slate-700/50">
+            <h3 className="text-sm font-semibold text-white tracking-wide">Costing Status</h3>
+            <span className="text-[11px] text-slate-400">Completed vs Pending</span>
+          </div>
+          <div className="flex-1 min-h-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={engineerPerformance} margin={{ top: 10, right: 15, left: -25, bottom: 25 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                <XAxis dataKey="name" stroke="#94a3b8" fontSize={9} tickLine={false} axisLine={false} angle={-35} textAnchor="end" height={50} interval={0} />
+                <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
+                <RechartsTooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc', borderRadius: '8px', fontSize: '12px' }} />
+                <Legend wrapperStyle={{ fontSize: '11px', bottom: -5 }} />
+                <Bar dataKey="completed" stackId="a" fill="#10b981" name="Completed" radius={[0, 0, 3, 3]} />
+                <Bar dataKey="pending" stackId="a" fill="#f59e0b" name="Pending" radius={[3, 3, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
-        {/* Total Value Graph (New requirement) */}
-        <div className="glass-card lg:col-span-1 h-[400px]">
-           <h3 className="text-lg font-semibold text-white mb-4">Costing per Lead Person</h3>
-           <div className="h-72">
-             <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={salesData} margin={{ top: 20, right: 30, left: -20, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} angle={-45} textAnchor="end" height={90} interval={0} />
-                  <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                  <RechartsTooltip 
-                    cursor={{fill: 'rgba(255,255,255,0.05)'}} 
-                    contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc', borderRadius: '8px' }} 
-                  />
-                  <Bar dataKey="count" fill="#3b82f6" name="Total Costings" radius={[4, 4, 0, 0]} />
-                </BarChart>
-             </ResponsiveContainer>
-           </div>
+        {/* Total Costing per Lead Person Graph */}
+        <div className="glass-card flex flex-col p-4 h-[350px]">
+          <div className="flex justify-between items-center mb-2.5 pb-2 border-b border-slate-700/50">
+            <h3 className="text-sm font-semibold text-white tracking-wide">Costing per Lead Person</h3>
+            <span className="text-[11px] text-slate-400">Total Enquiries</span>
+          </div>
+          <div className="flex-1 min-h-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={salesData} margin={{ top: 10, right: 15, left: -25, bottom: 25 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                <XAxis dataKey="name" stroke="#94a3b8" fontSize={9} tickLine={false} axisLine={false} angle={-35} textAnchor="end" height={50} interval={0} />
+                <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
+                <RechartsTooltip 
+                  cursor={{fill: 'rgba(255,255,255,0.05)'}} 
+                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc', borderRadius: '8px', fontSize: '12px' }} 
+                />
+                <Bar dataKey="count" fill="#3b82f6" name="Total Costings" radius={[3, 3, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
 
-      {/* --- BOTTOM ROW: Client Table --- */}
-      <div className="grid grid-cols-1 gap-6">
+      {/* --- BOTTOM ROW: Client Summary Table --- */}
+      <div className="glass-card flex flex-col p-4">
+        <div className="flex justify-between items-center mb-2.5 pb-2 border-b border-slate-700/50">
+          <h3 className="text-sm font-semibold text-white tracking-wide">Client Summary (Live Tracking)</h3>
+          <span className="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded-full">
+            {clientSummary.length} Leads
+          </span>
+        </div>
         
-        {/* Client Summary Table */}
-        <div className="glass-card overflow-auto h-[400px]">
-          <h3 className="text-lg font-semibold text-white mb-4">Client Summary (Live Tracking)</h3>
-          <table className="w-full text-left text-sm text-slate-300">
-            <thead className="text-xs uppercase bg-slate-800/50 text-slate-400 sticky top-0">
+        <div className="max-h-[250px] overflow-auto rounded-lg border border-slate-700/40">
+          <table className="w-full text-left text-xs text-slate-300">
+            <thead className="text-[11px] uppercase bg-slate-900 text-slate-400 sticky top-0 z-10 border-b border-slate-700/80 shadow-sm">
               <tr>
-                <th className="px-4 py-3 rounded-tl-lg">Client</th>
-                <th className="px-4 py-3">Value</th>
-                <th className="px-4 py-3">Costing Eng</th>
-                <th className="px-4 py-3">Lead Person</th>
-                <th className="px-4 py-3 rounded-tr-lg">Costing Status</th>
+                <th className="px-3 py-2 bg-slate-900 font-semibold">Client</th>
+                <th className="px-3 py-2 bg-slate-900 font-semibold">Value</th>
+                <th className="px-3 py-2 bg-slate-900 font-semibold">Costing Eng</th>
+                <th className="px-3 py-2 bg-slate-900 font-semibold">Lead Person</th>
+                <th className="px-3 py-2 bg-slate-900 font-semibold">Costing Status</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-800/60">
               {clientSummary.map((client) => {
                 const isPending = client.costingStatus === 'pending' || client.costingStatus === 'revision_in_progress';
                 return (
-                  <tr key={client.id} className="border-b border-slate-700/50 hover:bg-slate-800/30">
-                    <td className="px-4 py-3 font-medium text-white">{client.client}</td>
-                    <td className="px-4 py-3 text-blue-400 font-medium">{client.displayValue}</td>
-                    <td className="px-4 py-3 text-white">{client.engineer}</td>
-                    <td className="px-4 py-3 text-white">{client.salesPerson}</td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        !isPending ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
+                  <tr key={client.id} className="hover:bg-slate-800/40 transition-colors">
+                    <td className="px-3 py-1.5 font-medium text-white">{client.client}</td>
+                    <td className="px-3 py-1.5 text-blue-400 font-medium font-mono">{client.displayValue}</td>
+                    <td className="px-3 py-1.5 text-slate-200">{client.engineer}</td>
+                    <td className="px-3 py-1.5 text-slate-300">{client.salesPerson}</td>
+                    <td className="px-3 py-1.5">
+                      <span className={`px-2 py-0.5 rounded text-[11px] font-medium ${
+                        !isPending ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                       }`}>
                         {!isPending ? 'Completed' : 'Pending'}
                       </span>
@@ -421,7 +441,9 @@ export default function Dashboard() {
                   </tr>
                 );
               })}
-              {clientSummary.length === 0 && <tr><td colSpan="5" className="text-center py-6 text-slate-500">No leads match filters</td></tr>}
+              {clientSummary.length === 0 && (
+                <tr><td colSpan="5" className="text-center py-6 text-slate-500">No leads match filters</td></tr>
+              )}
             </tbody>
           </table>
         </div>
