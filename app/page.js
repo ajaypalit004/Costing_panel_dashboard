@@ -2,7 +2,7 @@ import Dashboard from '@/components/Dashboard';
 
 export default function Home() {
   return (
-    <main className="min-h-screen p-2.5 sm:p-4 lg:p-5">
+    <main className="h-screen w-screen overflow-x-hidden overflow-y-auto lg:overflow-hidden bg-[#0f172a] p-2 sm:p-3">
       <Dashboard />
     </main>
   );

@@ -201,52 +201,68 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="max-w-[1700px] mx-auto space-y-4 pb-4">
+    <div className="h-full flex flex-col gap-2.5 max-w-[1750px] mx-auto select-none">
       
-      {/* Header & Filters */}
-      <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 glass-card p-3 md:p-4">
-        <div>
-          <div className="flex items-center space-x-3">
-            <h1 className="text-xl md:text-2xl font-bold gradient-text">Costing Team Dashboard</h1>
-            <button
-              onClick={() => {
-                setSelectedWeek(selectedWeek === 'LATEST' ? 'All' : 'LATEST');
-                setSelectedMonth('All');
-              }}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-full border transition-all duration-200 ${
-                selectedWeek === 'LATEST'
-                  ? 'bg-blue-600 border-blue-400 text-white shadow-md shadow-blue-500/30'
-                  : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-blue-500 hover:text-white'
-              }`}
-            >
-              {selectedWeek === 'LATEST' ? '✓ Latest Week' : '⚡ Latest Week (Sun–Sun)'}
-            </button>
-          </div>
-          <p className="text-slate-400 text-xs mt-0.5">
-            Capacity & efficiency tracking
-            {selectedWeek === 'LATEST' && weeks[0] && (
-              <span className="text-blue-400 font-medium ml-1.5">
-                • {weeks[0].label} ({filteredLeads.length} leads)
-              </span>
-            )}
-          </p>
+      {/* Header, KPIs & Filters Bar */}
+      <header className="glass-card flex flex-wrap lg:flex-nowrap items-center justify-between p-2.5 px-3.5 gap-2.5 shrink-0">
+        {/* Left: Title & Quick Latest Week */}
+        <div className="flex items-center space-x-2.5 shrink-0">
+          <h1 className="text-base sm:text-lg font-bold gradient-text whitespace-nowrap">Costing Dashboard</h1>
+          <button
+            onClick={() => {
+              setSelectedWeek(selectedWeek === 'LATEST' ? 'All' : 'LATEST');
+              setSelectedMonth('All');
+            }}
+            className={`px-2 py-0.5 text-[11px] font-semibold rounded-full border transition-all duration-200 ${
+              selectedWeek === 'LATEST'
+                ? 'bg-blue-600 border-blue-400 text-white shadow-sm shadow-blue-500/30'
+                : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-blue-500 hover:text-white'
+            }`}
+          >
+            {selectedWeek === 'LATEST' ? '✓ Latest Week' : '⚡ Latest Week'}
+          </button>
         </div>
-        
-        <div className="flex flex-wrap gap-2 items-center">
+
+        {/* Center: 5 Quick KPI Badges */}
+        <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
+          <div className="flex items-center space-x-1 bg-slate-900/90 border border-slate-700/60 rounded-md px-2 py-0.5">
+            <span className="text-[9px] uppercase font-bold text-slate-400">Assigned:</span>
+            <span className="text-xs font-bold text-blue-400 font-mono">{kpiData.totalAssigned}</span>
+          </div>
+          <div className="flex items-center space-x-1 bg-slate-900/90 border border-slate-700/60 rounded-md px-2 py-0.5">
+            <span className="text-[9px] uppercase font-bold text-slate-400">Pending:</span>
+            <span className="text-xs font-bold text-amber-400 font-mono">{kpiData.pending}</span>
+          </div>
+          <div className="flex items-center space-x-1 bg-slate-900/90 border border-slate-700/60 rounded-md px-2 py-0.5">
+            <span className="text-[9px] uppercase font-bold text-slate-400">Top:</span>
+            <span className="text-xs font-bold text-emerald-400 truncate max-w-[100px]">{kpiData.topEngineer}</span>
+          </div>
+          <div className="flex items-center space-x-1 bg-slate-900/90 border border-slate-700/60 rounded-md px-2 py-0.5">
+            <span className="text-[9px] uppercase font-bold text-slate-400">Avg/Mo:</span>
+            <span className="text-xs font-bold text-purple-400 font-mono">{kpiData.avgCostingPerMonth}</span>
+          </div>
+          <div className="flex items-center space-x-1 bg-slate-900/90 border border-slate-700/60 rounded-md px-2 py-0.5">
+            <span className="text-[9px] uppercase font-bold text-slate-400">Quote:</span>
+            <span className="text-xs font-bold text-pink-400 font-mono">{kpiData.totalQuoteValue}</span>
+          </div>
+        </div>
+
+        {/* Right: Dropdown Filters */}
+        <div className="flex flex-wrap items-center gap-1.5 shrink-0">
           {/* Week Filter (Sunday to Sunday) */}
-          <div className="bg-slate-900/80 border border-slate-700/60 rounded-lg py-1.5 px-2.5 flex items-center space-x-1.5">
-            <span className="text-slate-400 text-[11px] font-semibold uppercase tracking-wider">Week:</span>
+          <div className="bg-slate-900/90 border border-slate-700/60 rounded-md py-1 px-2 flex items-center space-x-1">
+            <span className="text-slate-400 text-[10px] font-semibold uppercase">Week:</span>
             <select 
               value={selectedWeek} 
               onChange={e => {
                 setSelectedWeek(e.target.value);
                 if (e.target.value !== 'All') setSelectedMonth('All');
               }}
-              className="bg-transparent text-white text-xs outline-none cursor-pointer"
+              className="bg-transparent text-white text-[11px] outline-none cursor-pointer max-w-[140px]"
             >
               <option value="All" className="bg-slate-900 text-white">All Weeks</option>
               {weeks.length > 0 && (
-                <option value="LATEST" className="bg-slate-900 text-blue-400">⚡ Latest Week ({weeks[0].label})</option>
+                <option value="LATEST" className="bg-slate-900 text-blue-400">⚡ Latest ({weeks[0].label})</option>
               )}
               {weeks.map(w => (
                 <option key={w.key} value={w.key} className="bg-slate-900 text-white">{w.label}</option>
@@ -255,39 +271,39 @@ export default function Dashboard() {
           </div>
 
           {/* Month Filter */}
-          <div className="bg-slate-900/80 border border-slate-700/60 rounded-lg py-1.5 px-2.5 flex items-center space-x-1.5">
-            <span className="text-slate-400 text-[11px] font-semibold uppercase tracking-wider">Month:</span>
+          <div className="bg-slate-900/90 border border-slate-700/60 rounded-md py-1 px-2 flex items-center space-x-1">
+            <span className="text-slate-400 text-[10px] font-semibold uppercase">Mo:</span>
             <select 
               value={selectedMonth} 
               onChange={e => {
                 setSelectedMonth(e.target.value);
                 if (e.target.value !== 'All') setSelectedWeek('All');
               }}
-              className="bg-transparent text-white text-xs outline-none cursor-pointer"
+              className="bg-transparent text-white text-[11px] outline-none cursor-pointer max-w-[95px]"
             >
               {months.map(m => <option key={m} value={m} className="bg-slate-900 text-white">{m}</option>)}
             </select>
           </div>
           
           {/* Costing Engineer Filter */}
-          <div className="bg-slate-900/80 border border-slate-700/60 rounded-lg py-1.5 px-2.5 flex items-center space-x-1.5">
-            <span className="text-slate-400 text-[11px] font-semibold uppercase tracking-wider">Costing Eng:</span>
+          <div className="bg-slate-900/90 border border-slate-700/60 rounded-md py-1 px-2 flex items-center space-x-1">
+            <span className="text-slate-400 text-[10px] font-semibold uppercase">Eng:</span>
             <select 
               value={selectedEngineer} 
               onChange={e => setSelectedEngineer(e.target.value)}
-              className="bg-transparent text-white text-xs outline-none cursor-pointer"
+              className="bg-transparent text-white text-[11px] outline-none cursor-pointer max-w-[100px]"
             >
               {engineers.map(e => <option key={e} value={e} className="bg-slate-900 text-white">{e}</option>)}
             </select>
           </div>
 
           {/* Sales Person Filter */}
-          <div className="bg-slate-900/80 border border-slate-700/60 rounded-lg py-1.5 px-2.5 flex items-center space-x-1.5">
-            <span className="text-slate-400 text-[11px] font-semibold uppercase tracking-wider">Sales:</span>
+          <div className="bg-slate-900/90 border border-slate-700/60 rounded-md py-1 px-2 flex items-center space-x-1">
+            <span className="text-slate-400 text-[10px] font-semibold uppercase">Sales:</span>
             <select 
               value={selectedSalesPerson} 
               onChange={e => setSelectedSalesPerson(e.target.value)}
-              className="bg-transparent text-white text-xs outline-none cursor-pointer"
+              className="bg-transparent text-white text-[11px] outline-none cursor-pointer max-w-[90px]"
             >
               {salesPersons.map(s => <option key={s} value={s} className="bg-slate-900 text-white">{s}</option>)}
             </select>
@@ -302,7 +318,7 @@ export default function Dashboard() {
                 setSelectedEngineer('All');
                 setSelectedSalesPerson('All');
               }}
-              className="text-xs text-rose-400 hover:text-rose-300 font-medium px-2 py-1 transition-colors"
+              className="text-[11px] text-rose-400 hover:text-rose-300 font-semibold px-1.5 py-0.5 transition-colors"
             >
               Reset ✕
             </button>
@@ -310,142 +326,141 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* --- TOP ROW: KPI Summary --- */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-        <KpiCard title="Assigned" value={kpiData.totalAssigned} icon={FileText} colorClass="bg-blue-500" />
-        <KpiCard title="Pending" value={kpiData.pending} icon={Clock} colorClass="bg-amber-500" />
-        <KpiCard title="Top Performer" value={kpiData.topEngineer} icon={UserCheck} colorClass="bg-emerald-500" />
-        <KpiCard title="Avg Costing/Mo" value={kpiData.avgCostingPerMonth} icon={TrendingUp} colorClass="bg-purple-500" />
-        <KpiCard title="Total Quote" value={kpiData.totalQuoteValue} icon={IndianRupee} colorClass="bg-pink-500" />
-      </div>
-
-      {/* --- MIDDLE ROW: Performance + Lead Status Graph + Total Value Graph --- */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {/* Main Single-Screen Workspace */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 flex-1 min-h-0">
         
-        {/* Costing Person Status Table */}
-        <div className="glass-card flex flex-col p-4 h-[350px]">
-          <div className="flex justify-between items-center mb-2.5 pb-2 border-b border-slate-700/50">
-            <h3 className="text-sm font-semibold text-white tracking-wide">Costing Person Status</h3>
-            <span className="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded-full">
+        {/* Left Column (4 cols): Costing Person Status Table */}
+        <div className="glass-card flex flex-col p-3 lg:col-span-4 h-full min-h-0">
+          <div className="flex justify-between items-center mb-2 pb-1.5 border-b border-slate-700/50 shrink-0">
+            <h3 className="text-xs font-bold text-white uppercase tracking-wider">Costing Person Status</h3>
+            <span className="text-[10px] font-mono text-slate-400 bg-slate-800/90 px-2 py-0.5 rounded-full">
               {engineerPerformance.length} Persons
             </span>
           </div>
           
-          <div className="flex-1 overflow-auto rounded-lg border border-slate-700/40">
+          <div className="flex-1 min-h-0 overflow-y-auto rounded-md border border-slate-700/40">
             <table className="w-full text-left text-xs text-slate-300">
-              <thead className="text-[11px] uppercase bg-slate-900 text-slate-400 sticky top-0 z-10 border-b border-slate-700/80 shadow-sm">
+              <thead className="text-[10px] uppercase bg-slate-900 text-slate-400 sticky top-0 z-10 border-b border-slate-700/80 shadow-sm">
                 <tr>
-                  <th className="px-3 py-2 bg-slate-900 font-semibold">Costing Person</th>
-                  <th className="px-2 py-2 bg-slate-900 font-semibold text-center">Assigned</th>
-                  <th className="px-2 py-2 bg-slate-900 font-semibold text-center">Comp</th>
-                  <th className="px-2 py-2 bg-slate-900 font-semibold text-center">Pend</th>
+                  <th className="px-2.5 py-1.5 bg-slate-900 font-bold">Costing Person</th>
+                  <th className="px-1.5 py-1.5 bg-slate-900 font-bold text-center">Assigned</th>
+                  <th className="px-1.5 py-1.5 bg-slate-900 font-bold text-center">Comp</th>
+                  <th className="px-1.5 py-1.5 bg-slate-900 font-bold text-center">Pend</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {engineerPerformance.map((eng, idx) => (
                   <tr key={idx} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="px-3 py-1.5 font-medium text-white">{eng.name}</td>
-                    <td className="px-2 py-1.5 text-center font-mono">{eng.assigned}</td>
-                    <td className="px-2 py-1.5 text-center font-mono font-medium text-emerald-400">{eng.completed}</td>
-                    <td className="px-2 py-1.5 text-center font-mono font-medium text-amber-400">{eng.pending}</td>
+                    <td className="px-2.5 py-1 font-medium text-white text-[11px] truncate max-w-[130px]">{eng.name}</td>
+                    <td className="px-1.5 py-1 text-center font-mono text-[11px]">{eng.assigned}</td>
+                    <td className="px-1.5 py-1 text-center font-mono text-[11px] font-semibold text-emerald-400">{eng.completed}</td>
+                    <td className="px-1.5 py-1 text-center font-mono text-[11px] font-semibold text-amber-400">{eng.pending}</td>
                   </tr>
                 ))}
                 {engineerPerformance.length === 0 && (
-                  <tr><td colSpan="4" className="text-center py-6 text-slate-500">No data found</td></tr>
+                  <tr><td colSpan="4" className="text-center py-4 text-slate-500 text-xs">No data found</td></tr>
                 )}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* Lead Status Graph (Stacked) */}
-        <div className="glass-card flex flex-col p-4 h-[350px]">
-          <div className="flex justify-between items-center mb-2.5 pb-2 border-b border-slate-700/50">
-            <h3 className="text-sm font-semibold text-white tracking-wide">Costing Status</h3>
-            <span className="text-[11px] text-slate-400">Completed vs Pending</span>
-          </div>
-          <div className="flex-1 min-h-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={engineerPerformance} margin={{ top: 10, right: 15, left: -25, bottom: 25 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                <XAxis dataKey="name" stroke="#94a3b8" fontSize={9} tickLine={false} axisLine={false} angle={-35} textAnchor="end" height={50} interval={0} />
-                <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
-                <RechartsTooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc', borderRadius: '8px', fontSize: '12px' }} />
-                <Legend wrapperStyle={{ fontSize: '11px', bottom: -5 }} />
-                <Bar dataKey="completed" stackId="a" fill="#10b981" name="Completed" radius={[0, 0, 3, 3]} />
-                <Bar dataKey="pending" stackId="a" fill="#f59e0b" name="Pending" radius={[3, 3, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        {/* Right Column (8 cols): Top Charts + Bottom Live Tracking Table */}
+        <div className="flex flex-col gap-2.5 lg:col-span-8 h-full min-h-0">
+          
+          {/* Top Half: 2 Charts Side by Side */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 h-[48%] min-h-0">
+            
+            {/* Chart 1: Costing Status Stacked */}
+            <div className="glass-card flex flex-col p-2.5 h-full min-h-0">
+              <div className="flex justify-between items-center mb-1 pb-1 border-b border-slate-700/50 shrink-0">
+                <h3 className="text-xs font-bold text-white uppercase tracking-wider">Costing Status</h3>
+                <span className="text-[10px] text-slate-400">Completed vs Pending</span>
+              </div>
+              <div className="flex-1 min-h-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={engineerPerformance} margin={{ top: 5, right: 10, left: -25, bottom: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                    <XAxis dataKey="name" stroke="#94a3b8" fontSize={9} tickLine={false} axisLine={false} angle={-30} textAnchor="end" height={35} interval={0} />
+                    <YAxis stroke="#94a3b8" fontSize={9} tickLine={false} axisLine={false} />
+                    <RechartsTooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc', borderRadius: '6px', fontSize: '11px', padding: '4px 8px' }} />
+                    <Legend wrapperStyle={{ fontSize: '10px', bottom: -5 }} />
+                    <Bar dataKey="completed" stackId="a" fill="#10b981" name="Completed" radius={[0, 0, 2, 2]} />
+                    <Bar dataKey="pending" stackId="a" fill="#f59e0b" name="Pending" radius={[2, 2, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
 
-        {/* Total Costing per Lead Person Graph */}
-        <div className="glass-card flex flex-col p-4 h-[350px]">
-          <div className="flex justify-between items-center mb-2.5 pb-2 border-b border-slate-700/50">
-            <h3 className="text-sm font-semibold text-white tracking-wide">Costing per Lead Person</h3>
-            <span className="text-[11px] text-slate-400">Total Enquiries</span>
+            {/* Chart 2: Costing per Lead Person */}
+            <div className="glass-card flex flex-col p-2.5 h-full min-h-0">
+              <div className="flex justify-between items-center mb-1 pb-1 border-b border-slate-700/50 shrink-0">
+                <h3 className="text-xs font-bold text-white uppercase tracking-wider">Costing per Lead Person</h3>
+                <span className="text-[10px] text-slate-400">Total Enquiries</span>
+              </div>
+              <div className="flex-1 min-h-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={salesData} margin={{ top: 5, right: 10, left: -25, bottom: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                    <XAxis dataKey="name" stroke="#94a3b8" fontSize={9} tickLine={false} axisLine={false} angle={-30} textAnchor="end" height={35} interval={0} />
+                    <YAxis stroke="#94a3b8" fontSize={9} tickLine={false} axisLine={false} />
+                    <RechartsTooltip 
+                      cursor={{fill: 'rgba(255,255,255,0.05)'}} 
+                      contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc', borderRadius: '6px', fontSize: '11px', padding: '4px 8px' }} 
+                    />
+                    <Bar dataKey="count" fill="#3b82f6" name="Total Costings" radius={[2, 2, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </div>
-          <div className="flex-1 min-h-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={salesData} margin={{ top: 10, right: 15, left: -25, bottom: 25 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                <XAxis dataKey="name" stroke="#94a3b8" fontSize={9} tickLine={false} axisLine={false} angle={-35} textAnchor="end" height={50} interval={0} />
-                <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
-                <RechartsTooltip 
-                  cursor={{fill: 'rgba(255,255,255,0.05)'}} 
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc', borderRadius: '8px', fontSize: '12px' }} 
-                />
-                <Bar dataKey="count" fill="#3b82f6" name="Total Costings" radius={[3, 3, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
 
-      {/* --- BOTTOM ROW: Client Summary Table --- */}
-      <div className="glass-card flex flex-col p-4">
-        <div className="flex justify-between items-center mb-2.5 pb-2 border-b border-slate-700/50">
-          <h3 className="text-sm font-semibold text-white tracking-wide">Client Summary (Live Tracking)</h3>
-          <span className="text-[11px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded-full">
-            {clientSummary.length} Leads
-          </span>
-        </div>
-        
-        <div className="max-h-[250px] overflow-auto rounded-lg border border-slate-700/40">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="text-[11px] uppercase bg-slate-900 text-slate-400 sticky top-0 z-10 border-b border-slate-700/80 shadow-sm">
-              <tr>
-                <th className="px-3 py-2 bg-slate-900 font-semibold">Client</th>
-                <th className="px-3 py-2 bg-slate-900 font-semibold">Value</th>
-                <th className="px-3 py-2 bg-slate-900 font-semibold">Costing Eng</th>
-                <th className="px-3 py-2 bg-slate-900 font-semibold">Lead Person</th>
-                <th className="px-3 py-2 bg-slate-900 font-semibold">Costing Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60">
-              {clientSummary.map((client) => {
-                const isPending = client.costingStatus === 'pending' || client.costingStatus === 'revision_in_progress';
-                return (
-                  <tr key={client.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="px-3 py-1.5 font-medium text-white">{client.client}</td>
-                    <td className="px-3 py-1.5 text-blue-400 font-medium font-mono">{client.displayValue}</td>
-                    <td className="px-3 py-1.5 text-slate-200">{client.engineer}</td>
-                    <td className="px-3 py-1.5 text-slate-300">{client.salesPerson}</td>
-                    <td className="px-3 py-1.5">
-                      <span className={`px-2 py-0.5 rounded text-[11px] font-medium ${
-                        !isPending ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                      }`}>
-                        {!isPending ? 'Completed' : 'Pending'}
-                      </span>
-                    </td>
+          {/* Bottom Half: Client Summary (Live Tracking) Table */}
+          <div className="glass-card flex flex-col p-2.5 h-[52%] min-h-0">
+            <div className="flex justify-between items-center mb-1.5 pb-1 border-b border-slate-700/50 shrink-0">
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider">Client Summary (Live Tracking)</h3>
+              <span className="text-[10px] font-mono text-slate-400 bg-slate-800/90 px-2 py-0.5 rounded-full">
+                {clientSummary.length} Leads
+              </span>
+            </div>
+            
+            <div className="flex-1 min-h-0 overflow-y-auto rounded-md border border-slate-700/40">
+              <table className="w-full text-left text-xs text-slate-300">
+                <thead className="text-[10px] uppercase bg-slate-900 text-slate-400 sticky top-0 z-10 border-b border-slate-700/80 shadow-sm">
+                  <tr>
+                    <th className="px-2.5 py-1.5 bg-slate-900 font-bold">Client</th>
+                    <th className="px-2 py-1.5 bg-slate-900 font-bold">Value</th>
+                    <th className="px-2 py-1.5 bg-slate-900 font-bold">Costing Eng</th>
+                    <th className="px-2 py-1.5 bg-slate-900 font-bold">Lead Person</th>
+                    <th className="px-2 py-1.5 bg-slate-900 font-bold">Status</th>
                   </tr>
-                );
-              })}
-              {clientSummary.length === 0 && (
-                <tr><td colSpan="5" className="text-center py-6 text-slate-500">No leads match filters</td></tr>
-              )}
-            </tbody>
-          </table>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  {clientSummary.map((client) => {
+                    const isPending = client.costingStatus === 'pending' || client.costingStatus === 'revision_in_progress';
+                    return (
+                      <tr key={client.id} className="hover:bg-slate-800/40 transition-colors">
+                        <td className="px-2.5 py-1 font-medium text-white text-[11px] truncate max-w-[200px]">{client.client}</td>
+                        <td className="px-2 py-1 text-blue-400 font-medium font-mono text-[11px] whitespace-nowrap">{client.displayValue}</td>
+                        <td className="px-2 py-1 text-slate-200 text-[11px] truncate max-w-[120px]">{client.engineer}</td>
+                        <td className="px-2 py-1 text-slate-300 text-[11px] truncate max-w-[120px]">{client.salesPerson}</td>
+                        <td className="px-2 py-1">
+                          <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium whitespace-nowrap ${
+                            !isPending ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                          }`}>
+                            {!isPending ? 'Completed' : 'Pending'}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {clientSummary.length === 0 && (
+                    <tr><td colSpan="5" className="text-center py-4 text-slate-500 text-xs">No leads match filters</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
