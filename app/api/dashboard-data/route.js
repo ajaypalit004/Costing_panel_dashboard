@@ -3,17 +3,38 @@ import fs from 'fs';
 import path from 'path';
 import * as XLSX from 'xlsx';
 
-function excelDateToJSDate(serial) {
-  if (!serial) return new Date();
-  const utc_days  = Math.floor(serial - 25569);
-  const utc_value = utc_days * 86400;                                        
-  const date_info = new Date(utc_value * 1000);
-  return date_info;
+function parseDate(val) {
+  if (!val) return new Date();
+  if (typeof val === 'number') {
+    return new Date(Math.floor((val - 25569) * 86400 * 1000));
+  }
+  const num = parseFloat(val);
+  if (!isNaN(num) && num > 30000 && !String(val).includes('-') && !String(val).includes('/')) {
+    return new Date(Math.floor((num - 25569) * 86400 * 1000));
+  }
+  const d = new Date(val);
+  return isNaN(d.getTime()) ? new Date() : d;
+}
+
+const CANDIDATE_FILES = [
+  'costing-report-2026-08-26-09-53-12.csv',
+  'nn.xlsx',
+  'leads-report-20260709-104204.xlsx'
+];
+
+function getLatestDataFile() {
+  for (const filename of CANDIDATE_FILES) {
+    const fullPath = path.join(process.cwd(), filename);
+    if (fs.existsSync(fullPath)) {
+      return fullPath;
+    }
+  }
+  return path.join(process.cwd(), CANDIDATE_FILES[0]);
 }
 
 export async function GET() {
   try {
-    const filePath = path.join(process.cwd(), 'nn.xlsx');
+    const filePath = getLatestDataFile();
     const fileBuffer = fs.readFileSync(filePath);
     const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
@@ -22,19 +43,19 @@ export async function GET() {
     const leads = [];
 
     data.forEach(row => {
-      const assignedTo = String(row['Assigned To'] || '').trim();
-      const salesPerson = String(row['Sales Person'] || '').trim();
+      const assignedTo = String(row['Assigned To'] || row.engineer || '').trim();
+      const salesPerson = String(row['Sales Person'] || row['Lead Person'] || row.salesPerson || '').trim();
       const currentStatus = String(row['Current Status'] || '').trim().toLowerCase();
       const costingStatus = String(row['Costing Status'] || '').trim().toLowerCase();
-      const offerPrice = parseFloat(row['Offer Price']) || 0;
-      const customer = String(row['Customer'] || '').trim();
+      const offerPrice = parseFloat(String(row['Offer Price'] || 0).replace(/,/g, '')) || 0;
+      const customer = String(row['Customer'] || row.client || '').trim();
       
-      if (!assignedTo) return;
+      if (!assignedTo || assignedTo.toLowerCase().includes('total')) return;
 
-      const enqDate = excelDateToJSDate(row['Enquiry Date']);
+      const enqDate = parseDate(row['Enquiry Date']);
       const daysOpen = Math.floor((Date.now() - enqDate.getTime()) / (1000 * 60 * 60 * 24));
       
-      // Formatting Month Name (e.g., "May 2026")
+      // Formatting Month Name (e.g., "April 2026")
       const monthYear = enqDate.toLocaleString('default', { month: 'long', year: 'numeric' });
 
       leads.push({
@@ -56,6 +77,6 @@ export async function GET() {
     });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: 'Failed to process Excel' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to process data file' }, { status: 500 });
   }
 }
