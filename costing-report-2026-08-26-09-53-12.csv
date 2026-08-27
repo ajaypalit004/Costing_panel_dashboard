@@ -1,4 +1,4 @@
-﻿ID,Customer,"Assigned To","Enquiry Date","Current Status","Offer Price","Costing Status","costing accepted or rejected","Costing accepted date","Costing completion date"
+ID,Customer,"Assigned To","Enquiry Date","Current Status","Offer Price","Costing Status","costing accepted or rejected","Costing accepted date","Costing completion date"
 13,"  J K CEMENT ",Rakesh,2026-04-30,under_negotiation,3030600.00,done,Accepted,2026-05-02,2026-05-04
 14,Microtek,Rakesh,2026-04-30,won,43859000.00,done,Accepted,2026-05-04,2026-05-12
 15,"Maisons-Super ","Anil Yadav",2026-05-02,quoted,985000.00,revised_offer_submitted,Accepted,2026-05-06,2026-05-05
@@ -151,9 +151,3 @@
 230,"KS Engineering",Akhilesh,2026-08-24,won,1398182.00,revised_offer_submitted,Accepted,2026-08-25,2026-08-19
 231,"GA INFRA",Akhilesh,2026-08-20,won,6802729.00,revised_offer_submitted,Accepted,2026-08-25,2026-08-21
 232,"Prasheetan Aircon","Aashu ",2026-08-12,won,2351000.00,pending,Accepted,2026-08-25,2026-08-15
-
-"Total Rows",152
-"Total Leads",152
-"Total Users",12
-"Total Statuses",6
-"Total Offer Price",1446145962.2

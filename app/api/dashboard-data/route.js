@@ -63,14 +63,19 @@ export async function GET() {
     const leads = [];
 
     data.forEach(row => {
+      const rawId = String(row.ID || row['\ufeffID'] || '').trim();
+      const customer = String(row['Customer'] || row.client || '').trim();
       const assignedTo = String(row['Assigned To'] || row.engineer || '').trim();
+
+      // Skip non-data or summary rows (e.g. Total Rows, Total Leads, etc.)
+      if (!rawId || isNaN(Number(rawId))) return;
+      if (!customer || customer.toLowerCase().startsWith('total')) return;
+      if (!assignedTo || assignedTo.toLowerCase().includes('total')) return;
+
       const salesPerson = String(row['Sales Person'] || row['Lead Person'] || row.salesPerson || '').trim();
       const currentStatus = String(row['Current Status'] || '').trim().toLowerCase();
       const costingStatus = String(row['Costing Status'] || '').trim().toLowerCase();
       const offerPrice = parseFloat(String(row['Offer Price'] || 0).replace(/,/g, '')) || 0;
-      const customer = String(row['Customer'] || row.client || '').trim();
-      
-      if (!assignedTo || assignedTo.toLowerCase().includes('total')) return;
 
       const enqDate = parseDate(row['Enquiry Date']);
       const daysOpen = Math.floor((Date.now() - enqDate.getTime()) / (1000 * 60 * 60 * 24));

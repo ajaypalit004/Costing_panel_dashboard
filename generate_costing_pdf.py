@@ -13,12 +13,23 @@ def generate_pdf():
     csv_path = max(csv_files, key=os.path.getctime)
     df = pd.read_csv(csv_path)
 
-    # Assign empty Assigned To to "Suresh Saini"
-    df['Assigned To'] = df['Assigned To'].fillna('Suresh Saini').replace(r'^\s*$', 'Suresh Saini', regex=True)
+    # Filter out blank rows, summary rows (e.g. "Total Rows", "Total Leads", etc.), and non-numeric IDs
+    df['ID_num'] = pd.to_numeric(df.iloc[:, 0], errors='coerce')
+    df = df.dropna(subset=['ID_num'])
+    df['ID'] = df['ID_num'].astype(int)
 
-    # Sort by created date, latest first
+    # Filter out any summary rows in Customer column
+    cust_str = df['Customer'].astype(str).str.strip().str.lower()
+    df = df[~cust_str.str.startswith('total ')]
+    df = df[~cust_str.isin(['total rows', 'total leads', 'total users', 'total statuses', 'total offer price', 'nan', '', '-'])]
+
+    # Clean Assigned To
+    df['Assigned To'] = df['Assigned To'].fillna('Unassigned').astype(str).str.strip()
+    df['Assigned To'] = df['Assigned To'].replace(r'^\s*$', 'Unassigned', regex=True)
+
+    # Sort by enquiry date, latest first
     df['Enquiry Date dt'] = pd.to_datetime(df['Enquiry Date'], errors='coerce')
-    df = df.sort_values(by='Enquiry Date dt', ascending=False)
+    df = df.sort_values(by=['Enquiry Date dt', 'ID'], ascending=[False, False])
 
     def format_inr(val):
         if pd.isna(val) or val == '' or val == 0:
@@ -84,7 +95,22 @@ def generate_pdf():
     won_value = df[df['Current Status Lower'] == 'won']['Offer Price Num'].sum()
     quoted_value = df[df['Current Status Lower'] == 'quoted']['Offer Price Num'].sum()
 
-    # CALCULATE DASHBOARD KPIs
+    # Costing Done rule: Costing Status not in ['pending', 'revision_in_progress', '']
+    df['Costing Status Lower'] = df['Costing Status'].astype(str).str.lower().str.strip()
+    df['is_costing_done'] = ~df['Costing Status Lower'].isin(['pending', 'revision_in_progress', ''])
+
+    # CALCULATE HIGHEST NUMBER OF COSTING DONE BY COSTING PERSON
+    costing_done_counts = df[df['is_costing_done']].groupby('Assigned To').size().sort_values(ascending=False)
+    if not costing_done_counts.empty:
+        max_costing_done = int(costing_done_counts.iloc[0])
+        top_costing_persons = costing_done_counts[costing_done_counts == max_costing_done].index.tolist()
+        top_costing_person_name = " & ".join(top_costing_persons)
+        top_costing_person_val = max_costing_done
+    else:
+        top_costing_person_name = "-"
+        top_costing_person_val = 0
+
+    # CALCULATE COSTING PERSON BREAKDOWN
     grouped = df.groupby('Assigned To', dropna=False)
     summary_data = []
     highest_wins = {"name": "-", "val": 0}
@@ -92,9 +118,12 @@ def generate_pdf():
 
     for name, group in grouped:
         display_name = str(name) if pd.notna(name) else '-'
+        g_assigned = len(group)
+        g_done = int(group['is_costing_done'].sum())
+        g_pending = g_assigned - g_done
+        g_done_pct = (g_done / g_assigned * 100) if g_assigned > 0 else 0
+        
         g_won = (group['Current Status Lower'] == 'won').sum()
-        g_lost = (group['Current Status Lower'] == 'lost').sum()
-        g_closed = g_won + g_lost
         g_won_money = group[group['Current Status Lower'] == 'won']['Offer Price Num'].sum()
         g_total_money = group['Offer Price Num'].sum()
         
@@ -103,35 +132,56 @@ def generate_pdf():
         if g_won_money > highest_value['val']:
             highest_value = {"name": display_name, "val": g_won_money}
             
-        g_won_pct = (g_won / len(group) * 100) if len(group) > 0 else 0
-        g_conv_pct = (g_won_money / g_total_money * 100) if g_total_money > 0 else 0
-        
         summary_data.append({
-            "sales": display_name,
-            "total": len(group),
-            "closed": g_closed,
+            "name": display_name,
+            "assigned": g_assigned,
+            "done": g_done,
+            "pending": g_pending,
+            "done_pct": g_done_pct,
             "won": g_won,
-            "won_pct": g_won_pct,
             "total_money": g_total_money,
-            "won_money": g_won_money,
-            "conv_pct": g_conv_pct
+            "won_money": g_won_money
         })
+
+    # Sort summary data by Costings Done descending, then Assigned descending
+    summary_data.sort(key=lambda x: (x['done'], x['assigned']), reverse=True)
 
     # Summary Table HTML
     summary_html = ''
+    total_sum_assigned = sum(s['assigned'] for s in summary_data)
+    total_sum_done = sum(s['done'] for s in summary_data)
+    total_sum_pending = sum(s['pending'] for s in summary_data)
+    total_sum_won = sum(s['won'] for s in summary_data)
+    total_sum_money = sum(s['total_money'] for s in summary_data)
+    total_sum_won_money = sum(s['won_money'] for s in summary_data)
+
     for s in summary_data:
         summary_html += f'''
         <tr class="even-row">
-            <td class="font-semibold" style="color: #0f172a;">{html.escape(str(s['sales']))}</td>
-            <td class="text-center">{s['total']}</td>
-            <td class="text-center">{s['closed']}</td>
-            <td class="text-center"><span class="cost-badge cost-done">{s['won']}</span></td>
-            <td class="text-center"><span class="cost-badge cost-submitted">{s['won_pct']:.1f}%</span></td>
+            <td class="font-semibold" style="color: #0f172a;">{html.escape(str(s['name']))}</td>
+            <td class="text-center font-bold">{s['assigned']}</td>
+            <td class="text-center font-bold" style="color: #166534;"><span class="cost-badge cost-done">{s['done']}</span></td>
+            <td class="text-center font-bold" style="color: #b45309;"><span class="cost-badge cost-pending">{s['pending']}</span></td>
+            <td class="text-center font-bold"><span class="cost-badge cost-submitted">{s['done_pct']:.1f}%</span></td>
+            <td class="text-center font-bold" style="color: #16a34a;">{s['won']}</td>
             <td class="text-right font-mono price-cell">{format_inr(s['total_money'])}</td>
             <td class="text-right font-mono" style="color: #166534; font-weight: 700;">{format_inr(s['won_money'])}</td>
-            <td class="text-center"><span class="cost-badge cost-submitted">{s['conv_pct']:.1f}%</span></td>
         </tr>
         '''
+
+    # Add Total Row to Summary Table
+    summary_html += f'''
+    <tr style="background: #e2e8f0; font-weight: 800; border-top: 2px solid #64748b;">
+        <td class="font-bold">TOTAL</td>
+        <td class="text-center font-bold">{total_sum_assigned}</td>
+        <td class="text-center font-bold" style="color: #166534;">{total_sum_done}</td>
+        <td class="text-center font-bold" style="color: #b45309;">{total_sum_pending}</td>
+        <td class="text-center font-bold">{(total_sum_done/total_sum_assigned*100):.1f}%</td>
+        <td class="text-center font-bold" style="color: #16a34a;">{total_sum_won}</td>
+        <td class="text-right font-mono font-bold">{format_inr(total_sum_money)}</td>
+        <td class="text-right font-mono font-bold" style="color: #166534;">{format_inr(total_sum_won_money)}</td>
+    </tr>
+    '''
 
     rows_html = ''
     for idx, r in df.iterrows():
@@ -174,8 +224,11 @@ def generate_pdf():
     .kpi-value {{ font-size: 10.5pt; font-weight: 800; color: #0f172a; margin-top: 1px; }}
     .kpi-sub {{ font-size: 6pt; color: #475569; }}
     
-    .kpi-grid-4 {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }}
-    .kpi-card-4 {{ background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 5px 6px; text-align: center; }}
+    .kpi-grid-5 {{ display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 12px; }}
+    .kpi-card-5 {{ background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 5px 6px; text-align: center; border-top: 3px solid #3b82f6; }}
+    .kpi-card-5.highlight-costing {{ background: #f0fdf4; border-color: #86efac; border-top-color: #16a34a; }}
+    .kpi-card-5.highlight {{ background: #eff6ff; border-color: #bfdbfe; border-top-color: #2563eb; }}
+    .kpi-card-5.won-card {{ background: #f0fdf4; border-color: #bbf7d0; border-top-color: #10b981; }}
     
     .section-title {{ font-size: 10pt; font-weight: 700; color: #1e3a8a; margin-bottom: 4px; padding-left: 2px; line-height: 1; }}
 
@@ -262,41 +315,48 @@ def generate_pdf():
     </div>
 </div>
 
-<!-- NEW: 4 KPI DASHBOARD BOXES -->
-<div class="kpi-grid-4">
-    <div class="kpi-card-4 highlight">
+<!-- 5 KPI DASHBOARD BOXES -->
+<div class="kpi-grid-5">
+    <div class="kpi-card-5 highlight-costing">
+        <div class="kpi-title">HIGHEST COSTINGS COMPLETED</div>
+        <div class="kpi-value" style="color: #166534;">{top_costing_person_name}</div>
+        <div class="kpi-sub"><span class="cost-badge cost-done">{top_costing_person_val} Costings Done</span></div>
+    </div>
+    <div class="kpi-card-5 highlight">
         <div class="kpi-title">HIGHEST WINS (LEADS)</div>
         <div class="kpi-value">{highest_wins['name']}</div>
         <div class="kpi-sub"><span class="cost-badge cost-done">{highest_wins['val']} Won Leads</span></div>
     </div>
-    <div class="kpi-card-4 won-card">
-        <div class="kpi-title">HIGHEST ORDER VALUE</div>
+    <div class="kpi-card-5 won-card">
+        <div class="kpi-title">HIGHEST ORDER VALUE WON</div>
         <div class="kpi-value">{highest_value['name']}</div>
         <div class="kpi-sub"><span class="cost-badge cost-done">{format_inr(highest_value['val'])}</span></div>
     </div>
-    <div class="kpi-card-4">
+    <div class="kpi-card-5">
         <div class="kpi-title">TOTAL ORDER VALUE QUOTED</div>
         <div class="kpi-value" style="color:#1d4ed8;">{format_inr(total_pipeline)}</div>
+        <div class="kpi-sub">{quoted_count} Offers Quoted</div>
     </div>
-    <div class="kpi-card-4">
+    <div class="kpi-card-5">
         <div class="kpi-title">TOTAL ORDER VALUE WON</div>
         <div class="kpi-value" style="color:#166534;">{format_inr(won_value)}</div>
+        <div class="kpi-sub">{won_count} Orders Won</div>
     </div>
 </div>
 
-<!-- NEW: DETAILED BREAKDOWN TABLE -->
-<div class="section-title">Detailed Breakdown (Assigned Staff)</div>
+<!-- DETAILED BREAKDOWN TABLE -->
+<div class="section-title">Costing Person Workload & Performance Breakdown</div>
 <table>
     <thead>
         <tr>
-            <th>Assigned To</th>
-            <th class="text-center">Total Leads</th>
-            <th class="text-center">Closed Leads</th>
-            <th class="text-center">Leads Won</th>
-            <th class="text-center">Won %</th>
+            <th>Costing Person</th>
+            <th class="text-center">Total Assigned</th>
+            <th class="text-center">Costings Done</th>
+            <th class="text-center">Costings Pending</th>
+            <th class="text-center">Completion %</th>
+            <th class="text-center">Orders Won</th>
             <th class="text-right">Total Value Quoted</th>
             <th class="text-right">Total Value Won</th>
-            <th class="text-center">Conversion %</th>
         </tr>
     </thead>
     <tbody>
@@ -343,6 +403,8 @@ def generate_pdf():
         f.write(html_content)
 
     pdf_path = 'costing_report.pdf'
+    public_pdf_path = os.path.join('public', 'costing_report.pdf')
+    root_pdf_path = os.path.join('..', 'costing_report.pdf')
 
     with sync_playwright() as p:
         browser = p.chromium.launch()
@@ -359,6 +421,23 @@ def generate_pdf():
             footer_template='<div style="width: 100%; font-size: 6.5pt; color: #64748b; display: flex; justify-content: space-between; padding: 0 6mm; font-family: sans-serif;"><span>ENEEPL &bull; Costing Team Report</span><span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span></div>'
         )
         browser.close()
+
+    # Also copy to public/ folder and root
+    import shutil
+    try:
+        os.makedirs('public', exist_ok=True)
+        shutil.copy2(pdf_path, public_pdf_path)
+    except Exception as e:
+        print(f"Notice: public copy: {e}")
+
+    try:
+        shutil.copy2(pdf_path, root_pdf_path)
+    except Exception as e:
+        pass
+
+    print(f"Successfully generated clean report with {total_leads} leads!")
+    print(f"Top Costing Performer: {top_costing_person_name} ({top_costing_person_val} costings done)")
+    print(f"Saved PDF to {pdf_path} and {public_pdf_path}")
 
 if __name__ == '__main__':
     generate_pdf()
