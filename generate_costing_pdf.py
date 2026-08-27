@@ -99,12 +99,17 @@ def generate_pdf():
     df['Costing Status Lower'] = df['Costing Status'].astype(str).str.lower().str.strip()
     df['is_costing_done'] = ~df['Costing Status Lower'].isin(['pending', 'revision_in_progress', ''])
 
-    # CALCULATE HIGHEST NUMBER OF COSTING DONE BY COSTING PERSON
+    # CALCULATE HIGHEST NUMBER OF COSTING DONE BY COSTING PERSON (ONLY ONE SINGLE TOP PERSON)
     costing_done_counts = df[df['is_costing_done']].groupby('Assigned To').size().sort_values(ascending=False)
     if not costing_done_counts.empty:
         max_costing_done = int(costing_done_counts.iloc[0])
-        top_costing_persons = costing_done_counts[costing_done_counts == max_costing_done].index.tolist()
-        top_costing_person_name = " & ".join(top_costing_persons)
+        top_candidates = costing_done_counts[costing_done_counts == max_costing_done].index.tolist()
+        if len(top_candidates) == 1:
+            top_costing_person_name = str(top_candidates[0])
+        else:
+            # Tiebreaker: person with highest quote value handled
+            cand_values = df[df['Assigned To'].isin(top_candidates)].groupby('Assigned To')['Offer Price Num'].sum()
+            top_costing_person_name = str(cand_values.sort_values(ascending=False).index[0])
         top_costing_person_val = max_costing_done
     else:
         top_costing_person_name = "-"
