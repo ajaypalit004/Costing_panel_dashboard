@@ -1,0 +1,3036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ENEEPL • Leads & Enquiries Report</title>
+<style>
+  @page {
+    size: A4 landscape;
+    margin: 10mm 8mm 12mm 8mm;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1e293b;
+    background: #ffffff;
+    font-size: 9.5px;
+    line-height: 1.25;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2.5px solid #1e3a8a;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+  }
+
+  .header-left h1 {
+    font-size: 17px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.3px;
+  }
+
+  .header-left h1 span {
+    color: #2563eb;
+  }
+
+  .header-left p {
+    font-size: 10px;
+    color: #64748b;
+    font-weight: 500;
+    margin-top: 1px;
+  }
+
+  .header-right {
+    text-align: right;
+  }
+
+  .header-right .gen-time {
+    font-size: 9.5px;
+    color: #475569;
+    font-weight: 600;
+  }
+
+  .header-right .rec-count {
+    font-size: 10.5px;
+    color: #0f172a;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  /* KPI Cards Row */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 7px;
+    margin-bottom: 10px;
+  }
+
+  .kpi-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 5px;
+    padding: 5px 6px;
+    text-align: center;
+    border-top: 3px solid #3b82f6;
+  }
+
+  .kpi-card.kpi-total { border-top-color: #2563eb; background: #eff6ff; }
+  .kpi-card.kpi-won { border-top-color: #10b981; background: #f0fdf4; }
+  .kpi-card.kpi-quoted { border-top-color: #0284c7; background: #f0f9ff; }
+  .kpi-card.kpi-neg { border-top-color: #8b5cf6; background: #faf5ff; }
+  .kpi-card.kpi-pend { border-top-color: #f59e0b; background: #fffbeb; }
+  .kpi-card.kpi-lost { border-top-color: #ef4444; background: #fef2f2; }
+
+  .kpi-title {
+    font-size: 8px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 2px;
+  }
+
+  .kpi-val {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.1;
+  }
+
+  .kpi-sub {
+    font-size: 8px;
+    color: #64748b;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+
+  /* Summary Section: Costing Person (Image 1) & Sales Person (Image 2) */
+  .summary-section {
+    display: grid;
+    grid-template-columns: 1.05fr 1.35fr;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .summary-box {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .summary-title {
+    background: #1e293b;
+    color: #ffffff;
+    padding: 4px 7px;
+    font-size: 9.5px;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    letter-spacing: 0.3px;
+  }
+
+  .summary-title span.tag {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 1px 5px;
+    border-radius: 8px;
+    font-size: 8px;
+    font-weight: 600;
+  }
+
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.5px;
+  }
+
+  .summary-table th {
+    background: #f1f5f9;
+    color: #334155;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 3.5px 5px;
+    border-bottom: 1px solid #cbd5e1;
+    text-align: left;
+    font-size: 7.5px;
+  }
+
+  .summary-table th.text-center, .summary-table td.text-center { text-align: center; }
+  .summary-table th.text-right, .summary-table td.text-right { text-align: right; }
+
+  .summary-table td {
+    padding: 3px 5px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+  }
+
+  .summary-table tr:nth-child(even) {
+    background: #f8fafc;
+  }
+
+  .summary-table tr.total-row {
+    background: #e2e8f0;
+    font-weight: 700;
+    border-top: 1.5px solid #94a3b8;
+  }
+
+  /* Main Leads Data Table */
+  .section-divider {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #0f172a;
+    color: #ffffff;
+    padding: 4px 7px;
+    border-radius: 4px 4px 0 0;
+    font-size: 9.5px;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+
+  .main-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8px;
+    margin-bottom: 8px;
+  }
+
+  .main-table thead {
+    display: table-header-group;
+  }
+
+  .main-table tr {
+    page-break-inside: avoid;
+  }
+
+  .main-table th {
+    background: #1e293b;
+    color: #ffffff;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 4.5px 3.5px;
+    font-size: 7px;
+    letter-spacing: 0.3px;
+    border-right: 1px solid #334155;
+    text-align: left;
+  }
+
+  .main-table th:last-child { border-right: none; }
+
+  .main-table td {
+    padding: 3.5px 3.5px;
+    border-bottom: 1px solid #e2e8f0;
+    border-right: 1px solid #f1f5f9;
+    color: #1e293b;
+    vertical-align: middle;
+  }
+
+  .main-table td:last-child { border-right: none; }
+
+  .main-table tr:nth-child(even) {
+    background: #f8fafc;
+  }
+
+  /* Status Badges */
+  .badge {
+    display: inline-block;
+    padding: 1px 4.5px;
+    border-radius: 8px;
+    font-size: 7px;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .badge-won { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+  .badge-quoted { background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; }
+  .badge-neg { background: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; }
+  .badge-tech { background: #e0e7ff; color: #4338ca; border: 1px solid #a5b4fc; }
+  .badge-pend { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
+  .badge-lost { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+  .cost-badge {
+    display: inline-block;
+    padding: 1px 4.5px;
+    border-radius: 3px;
+    font-size: 7px;
+    font-weight: 600;
+  }
+
+  .cost-done { background: #f0fdf4; color: #16a34a; font-weight: 700; }
+  .cost-revised { background: #eff6ff; color: #2563eb; }
+  .cost-progress { background: #fff7ed; color: #ea580c; }
+  .cost-vendor { background: #faf5ff; color: #9333ea; }
+  .cost-query { background: #fef2f2; color: #dc2626; }
+  .cost-pending { background: #fffbeb; color: #d97706; font-weight: 700; }
+</style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h1>ENEEPL • <span>LEADS & ENQUIRIES REPORT</span></h1>
+      <p>Comprehensive Lead Tracking, Sales Pipeline & Costing Workload Report</p>
+    </div>
+    <div class="header-right">
+      <div class="gen-time">Generated: 26-Aug-2026 06:30 PM</div>
+      <div class="rec-count">Total Enquiries: 204 Records (Sorted Latest First)</div>
+    </div>
+  </div>
+
+  <!-- KPI Cards Row -->
+  <div class="kpi-row">
+    <div class="kpi-card kpi-total">
+      <div class="kpi-title">Total Pipeline Value</div>
+      <div class="kpi-val">₹ 146.14 Cr</div>
+      <div class="kpi-sub">204 Total Leads</div>
+    </div>
+    <div class="kpi-card kpi-won">
+      <div class="kpi-title">Orders Won</div>
+      <div class="kpi-val">45</div>
+      <div class="kpi-sub">₹ 20.58 Cr Won</div>
+    </div>
+    <div class="kpi-card kpi-quoted">
+      <div class="kpi-title">Quoted Offers</div>
+      <div class="kpi-val">66</div>
+      <div class="kpi-sub">₹ 37.12 Cr Quoted</div>
+    </div>
+    <div class="kpi-card kpi-neg">
+      <div class="kpi-title">Under Negotiation</div>
+      <div class="kpi-val">6</div>
+      <div class="kpi-sub">₹ 7.69 Cr Pipeline</div>
+    </div>
+    <div class="kpi-card kpi-pend">
+      <div class="kpi-title">Pending Enquiries</div>
+      <div class="kpi-val">78</div>
+      <div class="kpi-sub">Awaiting Quote / Review</div>
+    </div>
+    <div class="kpi-card kpi-lost">
+      <div class="kpi-title">Lost / Inactive</div>
+      <div class="kpi-val">9</div>
+      <div class="kpi-sub">Closed Unsuccessful</div>
+    </div>
+  </div>
+
+  <!-- Summary Section: Costing Person (Image 1) & Sales Person (Image 2) -->
+  <div class="summary-section">
+    
+    <!-- Image 1: Costing Person Status Table -->
+    <div class="summary-box">
+      <div class="summary-title">
+        <span>COSTING PERSON WORKLOAD SUMMARY</span>
+        <span class="tag">13 Engineers</span>
+      </div>
+      <table class="summary-table">
+        <thead>
+          <tr>
+            <th>Costing Person</th>
+            <th class="text-center">Assigned</th>
+            <th class="text-center">Comp</th>
+            <th class="text-center">Pend</th>
+            <th class="text-right">Total Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Unassigned</strong></td>
+            <td class="text-center font-mono">52</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">0</td>
+            <td class="text-center font-mono" style="color: #d97706; font-weight: 700;">52</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 1.53 Cr</td>
+          </tr>
+          <tr>
+            <td><strong>Rakesh</strong></td>
+            <td class="text-center font-mono">32</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">28</td>
+            <td class="text-center font-mono" style="color: #d97706; font-weight: 700;">4</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 63.44 Cr</td>
+          </tr>
+          <tr>
+            <td><strong>Anil Yadav</strong></td>
+            <td class="text-center font-mono">28</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">28</td>
+            <td class="text-center font-mono" style="color: #d97706; font-weight: 700;">0</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 7.78 Cr</td>
+          </tr>
+          <tr>
+            <td><strong>Akhilesh</strong></td>
+            <td class="text-center font-mono">22</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">21</td>
+            <td class="text-center font-mono" style="color: #d97706; font-weight: 700;">1</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 15.76 Cr</td>
+          </tr>
+          <tr>
+            <td><strong>Deepak Janyani</strong></td>
+            <td class="text-center font-mono">21</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">17</td>
+            <td class="text-center font-mono" style="color: #d97706; font-weight: 700;">4</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 24.48 Cr</td>
+          </tr>
+          <tr>
+            <td><strong>Aayushi</strong></td>
+            <td class="text-center font-mono">16</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">11</td>
+            <td class="text-center font-mono" style="color: #d97706; font-weight: 700;">5</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 19.71 Cr</td>
+          </tr>
+          <tr>
+            <td><strong>Aashu</strong></td>
+            <td class="text-center font-mono">10</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">7</td>
+            <td class="text-center font-mono" style="color: #d97706; font-weight: 700;">3</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 5.25 Cr</td>
+          </tr>
+          <tr>
+            <td><strong>Aditya Soni</strong></td>
+            <td class="text-center font-mono">9</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">7</td>
+            <td class="text-center font-mono" style="color: #d97706; font-weight: 700;">2</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 79.80 L</td>
+          </tr>
+          <tr>
+            <td><strong>RamKrishna Pandey</strong></td>
+            <td class="text-center font-mono">4</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">4</td>
+            <td class="text-center font-mono" style="color: #d97706; font-weight: 700;">0</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 3.22 Cr</td>
+          </tr>
+          <tr>
+            <td><strong>Bharat</strong></td>
+            <td class="text-center font-mono">3</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">3</td>
+            <td class="text-center font-mono" style="color: #d97706; font-weight: 700;">0</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 1.21 Cr</td>
+          </tr>
+          <tr>
+            <td><strong>Pavan Kumar</strong></td>
+            <td class="text-center font-mono">3</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">3</td>
+            <td class="text-center font-mono" style="color: #d97706; font-weight: 700;">0</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 1.93 Cr</td>
+          </tr>
+          <tr>
+            <td><strong>Amit Gautam</strong></td>
+            <td class="text-center font-mono">3</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">2</td>
+            <td class="text-center font-mono" style="color: #d97706; font-weight: 700;">1</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 1.03 Cr</td>
+          </tr>
+          <tr>
+            <td><strong>vikram</strong></td>
+            <td class="text-center font-mono">1</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">1</td>
+            <td class="text-center font-mono" style="color: #d97706; font-weight: 700;">0</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 10,000.00</td>
+          </tr>
+          <tr class="total-row">
+            <td>TOTAL</td>
+            <td class="text-center">204</td>
+            <td class="text-center" style="color: #16a34a;">132</td>
+            <td class="text-center" style="color: #d97706;">72</td>
+            <td class="text-right">₹ 146.14 Cr</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Image 2: Sales Person Summary Table -->
+    <div class="summary-box">
+      <div class="summary-title">
+        <span>LEAD PERSON (SALES) PIPELINE SUMMARY</span>
+        <span class="tag">10 Lead Persons</span>
+      </div>
+      <table class="summary-table">
+        <thead>
+          <tr>
+            <th>Sales / Lead Person</th>
+            <th class="text-center">Leads</th>
+            <th class="text-center">Won</th>
+            <th class="text-center">Quoted</th>
+            <th class="text-center">Pend</th>
+            <th class="text-right">Total Quote Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Amit Gautam</strong></td>
+            <td class="text-center font-mono">46</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">15</td>
+            <td class="text-center font-mono" style="color: #0284c7; font-weight: 600;">11</td>
+            <td class="text-center font-mono" style="color: #d97706;">18</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 26.21 Cr</td>
+          </tr>
+          <tr>
+            <td><strong>Puneet Sharma</strong></td>
+            <td class="text-center font-mono">40</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">7</td>
+            <td class="text-center font-mono" style="color: #0284c7; font-weight: 600;">0</td>
+            <td class="text-center font-mono" style="color: #d97706;">28</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 39.75 Cr</td>
+          </tr>
+          <tr>
+            <td><strong>Anil Yadav</strong></td>
+            <td class="text-center font-mono">30</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">10</td>
+            <td class="text-center font-mono" style="color: #0284c7; font-weight: 600;">14</td>
+            <td class="text-center font-mono" style="color: #d97706;">4</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 7.78 Cr</td>
+          </tr>
+          <tr>
+            <td><strong>Bhupender Sharma</strong></td>
+            <td class="text-center font-mono">26</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">3</td>
+            <td class="text-center font-mono" style="color: #0284c7; font-weight: 600;">14</td>
+            <td class="text-center font-mono" style="color: #d97706;">8</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 57.29 Cr</td>
+          </tr>
+          <tr>
+            <td><strong>mohan shyam</strong></td>
+            <td class="text-center font-mono">26</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">8</td>
+            <td class="text-center font-mono" style="color: #0284c7; font-weight: 600;">16</td>
+            <td class="text-center font-mono" style="color: #d97706;">2</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 1.93 Cr</td>
+          </tr>
+          <tr>
+            <td><strong>-</strong></td>
+            <td class="text-center font-mono">17</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">0</td>
+            <td class="text-center font-mono" style="color: #0284c7; font-weight: 600;">1</td>
+            <td class="text-center font-mono" style="color: #d97706;">14</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 1.46 Cr</td>
+          </tr>
+          <tr>
+            <td><strong>Deepak Janyani</strong></td>
+            <td class="text-center font-mono">7</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">1</td>
+            <td class="text-center font-mono" style="color: #0284c7; font-weight: 600;">4</td>
+            <td class="text-center font-mono" style="color: #d97706;">2</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 9.90 Cr</td>
+          </tr>
+          <tr>
+            <td><strong>gopal singh</strong></td>
+            <td class="text-center font-mono">5</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">0</td>
+            <td class="text-center font-mono" style="color: #0284c7; font-weight: 600;">4</td>
+            <td class="text-center font-mono" style="color: #d97706;">1</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 97.04 L</td>
+          </tr>
+          <tr>
+            <td><strong>Aditya Soni</strong></td>
+            <td class="text-center font-mono">5</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">1</td>
+            <td class="text-center font-mono" style="color: #0284c7; font-weight: 600;">2</td>
+            <td class="text-center font-mono" style="color: #d97706;">0</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 78.29 L</td>
+          </tr>
+          <tr>
+            <td><strong>vikas</strong></td>
+            <td class="text-center font-mono">2</td>
+            <td class="text-center font-mono" style="color: #16a34a; font-weight: 700;">0</td>
+            <td class="text-center font-mono" style="color: #0284c7; font-weight: 600;">0</td>
+            <td class="text-center font-mono" style="color: #d97706;">1</td>
+            <td class="text-right font-mono" style="color: #2563eb; font-weight: 600;">₹ 6.65 L</td>
+          </tr>
+          <tr class="total-row">
+            <td>TOTAL</td>
+            <td class="text-center">204</td>
+            <td class="text-center" style="color: #16a34a;">45</td>
+            <td class="text-center" style="color: #0284c7;">66</td>
+            <td class="text-center" style="color: #d97706;">78</td>
+            <td class="text-right">₹ 146.14 Cr</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Detailed Leads Table Section -->
+  <div class="section-divider">
+    <span>ALL LEADS & ENQUIRIES (SORTED BY DATE - LATEST FIRST)</span>
+    <span>204 Records</span>
+  </div>
+
+  <table class="main-table">
+    <thead>
+      <tr>
+        <th style="width: 28px; text-align: center;">ID</th>
+        <th style="width: 175px;">Customer</th>
+        <th style="width: 90px;">Sales Person</th>
+        <th style="width: 90px;">Costing Eng</th>
+        <th style="width: 65px;">Enquiry Date</th>
+        <th style="width: 90px; text-align: center;">Current Status</th>
+        <th style="width: 80px; text-align: right;">Offer Price</th>
+        <th style="width: 65px;">Offer Sub. Date</th>
+        <th style="width: 105px;">Costing Status</th>
+        <th style="width: 60px;">Created At</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">234</td>
+        <td style="font-weight: 600; color: #0f172a;">GENESIS INTERNATIONAL</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>8/26/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>8/26/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">233</td>
+        <td style="font-weight: 600; color: #0f172a;">SEFRICODE</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>8/25/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>8/25/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">228</td>
+        <td style="font-weight: 600; color: #0f172a;">GHADI</td>
+        <td>Deepak Janyani</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>8/25/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>8/25/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">230</td>
+        <td style="font-weight: 600; color: #0f172a;">KS Engineering</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>8/24/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 13,98,182</td>
+        <td>8/19/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>8/25/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">222</td>
+        <td style="font-weight: 600; color: #0f172a;">Dalmia Kadappa-2, Telengana</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>8/21/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>8/21/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">231</td>
+        <td style="font-weight: 600; color: #0f172a;">GA INFRA</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>8/20/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 68,02,729</td>
+        <td>8/21/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>8/25/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">227</td>
+        <td style="font-weight: 600; color: #0f172a;">A one Builders</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>8/19/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 36,73,196</td>
+        <td>8/25/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>8/22/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">229</td>
+        <td style="font-weight: 600; color: #0f172a;">SGB Infra</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Aashu</td>
+        <td>8/18/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 9,00,000</td>
+        <td>8/24/2026</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>8/25/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">226</td>
+        <td style="font-weight: 600; color: #0f172a;">SEFRICODE</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>8/18/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>8/22/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">221</td>
+        <td style="font-weight: 600; color: #0f172a;">Shree Cement Ltd | Gurugram</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>8/17/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 1,91,04,630</td>
+        <td>8/19/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>8/17/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">225</td>
+        <td style="font-weight: 600; color: #0f172a;">A one Builders</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>8/13/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 24,72,700</td>
+        <td>8/17/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>8/22/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">224</td>
+        <td style="font-weight: 600; color: #0f172a;">A one Builders</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>8/13/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 79,66,801</td>
+        <td>8/24/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>8/22/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">232</td>
+        <td style="font-weight: 600; color: #0f172a;">Prasheetan Aircon</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Aashu</td>
+        <td>8/12/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 23,51,000</td>
+        <td>8/15/2026</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>8/25/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">218</td>
+        <td style="font-weight: 600; color: #0f172a;">TAPRI</td>
+        <td>Aditya Soni</td>
+        <td style="font-weight: 600; color: #334155;">Aditya Soni</td>
+        <td>8/7/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 1,03,237</td>
+        <td>8/7/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>8/10/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">216</td>
+        <td style="font-weight: 600; color: #0f172a;">Shree Cement Ltd | Gurugram</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>8/4/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 59,44,800</td>
+        <td>8/6/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>8/4/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">217</td>
+        <td style="font-weight: 600; color: #0f172a;">Maheshwari distributor</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>8/3/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 5,21,42,000</td>
+        <td>8/10/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>8/5/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">215</td>
+        <td style="font-weight: 600; color: #0f172a;">MAP Engineers & Consultants Pvt. Ltd.</td>
+        <td>gopal singh</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>8/3/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 23,76,300</td>
+        <td>8/18/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>8/3/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">220</td>
+        <td style="font-weight: 600; color: #0f172a;">HYCONE PROJECTS</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>8/1/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>8/11/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">219</td>
+        <td style="font-weight: 600; color: #0f172a;">SEFRICODE</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>7/29/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 19,51,610</td>
+        <td>8/10/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>8/11/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">213</td>
+        <td style="font-weight: 600; color: #0f172a;">KAHAN ELECTRICAL</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>7/28/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>7/28/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">223</td>
+        <td style="font-weight: 600; color: #0f172a;">LORI KEETAMENITIES (PARUL HOTEL)</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>7/24/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 12,40,000</td>
+        <td>8/31/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>8/22/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">211</td>
+        <td style="font-weight: 600; color: #0f172a;">B.Odhavji & company</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>7/23/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>7/23/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">210</td>
+        <td style="font-weight: 600; color: #0f172a;">Westin hotel Jaipur</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Aditya Soni</td>
+        <td>7/23/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>7/23/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">209</td>
+        <td style="font-weight: 600; color: #0f172a;">Hindustan Copper Limited</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>7/23/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>7/23/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">208</td>
+        <td style="font-weight: 600; color: #0f172a;">A one Builders</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>7/23/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 4,50,000</td>
+        <td>7/23/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>7/23/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">207</td>
+        <td style="font-weight: 600; color: #0f172a;">UTCL, Awarpur cement works</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>7/22/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 42,09,600</td>
+        <td>7/27/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>7/23/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">201</td>
+        <td style="font-weight: 600; color: #0f172a;">A one Builders</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>7/20/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 6,36,277</td>
+        <td>7/21/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>7/21/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">200</td>
+        <td style="font-weight: 600; color: #0f172a;">AARYAN VENTURA PVT LTD.</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>7/18/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>7/18/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">214</td>
+        <td style="font-weight: 600; color: #0f172a;">MAISONS - SUPER</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>7/17/2026</td>
+        <td style="text-align: center;"><span class="badge badge-lost">Lost</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 1,49,375</td>
+        <td>7/30/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>7/30/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">199</td>
+        <td style="font-weight: 600; color: #0f172a;">KAHAN ELECTRICAL</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>7/17/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 3,77,19,100</td>
+        <td>7/20/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>7/18/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">196</td>
+        <td style="font-weight: 600; color: #0f172a;">Gravita</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Aditya Soni</td>
+        <td>7/17/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>7/18/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">195</td>
+        <td style="font-weight: 600; color: #0f172a;">NVCL, Ahemdabad</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>7/17/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>7/18/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">198</td>
+        <td style="font-weight: 600; color: #0f172a;">KAHAN ELECTRICAL</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>7/16/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 1,41,45,800</td>
+        <td>7/21/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>7/18/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">206</td>
+        <td style="font-weight: 600; color: #0f172a;">Ethan Power private Ltd.</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>7/15/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 47,45,259</td>
+        <td>7/28/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>7/22/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">203</td>
+        <td style="font-weight: 600; color: #0f172a;">MAHESHWARI DISTRIBUTOR</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>7/15/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 2,55,95,600</td>
+        <td>7/22/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>7/22/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">194</td>
+        <td style="font-weight: 600; color: #0f172a;">Real Eco paper pvt Ltd</td>
+        <td>Deepak Janyani</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>7/15/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 43,91,542</td>
+        <td>8/5/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>7/16/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">202</td>
+        <td style="font-weight: 600; color: #0f172a;">Mundra Ramming Mass Private Limited</td>
+        <td>Aditya Soni</td>
+        <td style="font-weight: 600; color: #334155;">Aditya Soni</td>
+        <td>7/14/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 25,53,291</td>
+        <td>7/16/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>7/22/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">197</td>
+        <td style="font-weight: 600; color: #0f172a;">GK Group</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>7/9/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>7/18/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">212</td>
+        <td style="font-weight: 600; color: #0f172a;">TIRUPATI ELECTRICALS</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Pavan Kumar</td>
+        <td>7/8/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 18,92,700</td>
+        <td>8/1/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>7/28/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">204</td>
+        <td style="font-weight: 600; color: #0f172a;">STYERENIX LTD.</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>7/8/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 1,24,12,900</td>
+        <td>7/22/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>7/22/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">184</td>
+        <td style="font-weight: 600; color: #0f172a;">SRB POWER INDIA PRIVATE LIMITED</td>
+        <td>Aditya Soni</td>
+        <td style="font-weight: 600; color: #334155;">Aditya Soni</td>
+        <td>7/8/2026</td>
+        <td style="text-align: center;"><span class="badge badge-lost">Lost</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 12,37,414</td>
+        <td>7/8/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>7/8/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">192</td>
+        <td style="font-weight: 600; color: #0f172a;">COLLIERS INTERNATIONAL(INDIA) PROPERTY SERVICES PVT. LTD.</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>7/7/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 58,05,317</td>
+        <td>7/10/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>7/10/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">189</td>
+        <td style="font-weight: 600; color: #0f172a;">CHEER SAGAR</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>7/7/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 10,34,000</td>
+        <td>7/9/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>7/9/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">188</td>
+        <td style="font-weight: 600; color: #0f172a;">Pansen Engineering</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>7/7/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>7/8/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">187</td>
+        <td style="font-weight: 600; color: #0f172a;">JK Cement Saifco Private Limited</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aayushi</td>
+        <td>7/7/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>7/8/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">186</td>
+        <td style="font-weight: 600; color: #0f172a;">JK Cement Saifco Private Limited</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aayushi</td>
+        <td>7/7/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>7/8/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">185</td>
+        <td style="font-weight: 600; color: #0f172a;">JK Cement Saifco Private Limited</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aayushi</td>
+        <td>7/6/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 3,28,000</td>
+        <td>6/30/2026</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>7/8/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">183</td>
+        <td style="font-weight: 600; color: #0f172a;">HYPER GREEN ENERGY</td>
+        <td>Aditya Soni</td>
+        <td style="font-weight: 600; color: #334155;">Aditya Soni</td>
+        <td>7/5/2026</td>
+        <td style="text-align: center;"><span class="badge badge-lost">Lost</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 3,54,079</td>
+        <td>7/6/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>7/8/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">190</td>
+        <td style="font-weight: 600; color: #0f172a;">RISHABH INTERIOR</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>7/2/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 3,01,000</td>
+        <td>7/10/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>7/10/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">182</td>
+        <td style="font-weight: 600; color: #0f172a;">RJ PACKAGING</td>
+        <td>Deepak Janyani</td>
+        <td style="font-weight: 600; color: #334155;">Pavan Kumar</td>
+        <td>7/2/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 1,63,36,400</td>
+        <td>7/11/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>7/8/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">179</td>
+        <td style="font-weight: 600; color: #0f172a;">Modren Construction</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>7/2/2026</td>
+        <td style="text-align: center;"><span class="badge badge-tech">Tech Qualified</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 23,67,100</td>
+        <td>7/24/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>7/4/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">177</td>
+        <td style="font-weight: 600; color: #0f172a;">Prasheetan Aircon</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Aashu</td>
+        <td>7/2/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 51,00,700</td>
+        <td>7/20/2026</td>
+        <td><span class="cost-badge cost-progress">Revision In Progress</span></td>
+        <td>7/3/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">176</td>
+        <td style="font-weight: 600; color: #0f172a;">HEC INFRA</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>7/2/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>7/3/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">191</td>
+        <td style="font-weight: 600; color: #0f172a;">HEI POWER SYSTEM PVT. LTD.</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>7/1/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 52,05,720</td>
+        <td>7/10/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>7/10/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">181</td>
+        <td style="font-weight: 600; color: #0f172a;">test</td>
+        <td>vikas</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>7/1/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 6,54,654</td>
+        <td>7/6/2026</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>7/4/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">175</td>
+        <td style="font-weight: 600; color: #0f172a;">Reliance</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>6/30/2026</td>
+        <td style="text-align: center;"><span class="badge badge-tech">Tech Qualified</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 2,63,500</td>
+        <td>7/2/2026</td>
+        <td><span class="cost-badge cost-vendor">Negotiating With Vendor</span></td>
+        <td>7/2/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">174</td>
+        <td style="font-weight: 600; color: #0f172a;">J K CEMENT</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>6/30/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>6/30/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">173</td>
+        <td style="font-weight: 600; color: #0f172a;">Shree Cement Ltd | Gurugram</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>6/30/2026</td>
+        <td style="text-align: center;"><span class="badge badge-lost">Lost</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 43,00,000</td>
+        <td>7/6/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/30/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">205</td>
+        <td style="font-weight: 600; color: #0f172a;">INA Solar, Narmadapuram, Cell plant</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>6/29/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>7/22/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">171</td>
+        <td style="font-weight: 600; color: #0f172a;">Shree Cement Ltd | Gurugram</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>6/29/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 5,10,21,989</td>
+        <td>7/10/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/30/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">178</td>
+        <td style="font-weight: 600; color: #0f172a;">TRIMURTY BUILDER</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">RamKrishna Pandey</td>
+        <td>6/27/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 48,00,000</td>
+        <td>7/2/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>7/3/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">172</td>
+        <td style="font-weight: 600; color: #0f172a;">J K CEMENT</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aashu</td>
+        <td>6/27/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>6/30/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">162</td>
+        <td style="font-weight: 600; color: #0f172a;">Modren Construction</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>6/25/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 1,03,00,000</td>
+        <td>7/11/2026</td>
+        <td><span class="cost-badge cost-query">Technical Query</span></td>
+        <td>6/25/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">170</td>
+        <td style="font-weight: 600; color: #0f172a;">TECHNICAL CONSULTANT</td>
+        <td>Aditya Soni</td>
+        <td style="font-weight: 600; color: #334155;">Aditya Soni</td>
+        <td>6/24/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 35,80,807</td>
+        <td>6/26/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/27/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">159</td>
+        <td style="font-weight: 600; color: #0f172a;">J K CEMENT</td>
+        <td>vikas</td>
+        <td style="font-weight: 600; color: #334155;">vikram</td>
+        <td>6/23/2026</td>
+        <td style="text-align: center;"><span class="badge badge-neg">Under Negotiation</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 10,000</td>
+        <td>6/23/2026</td>
+        <td><span class="cost-badge cost-vendor">Negotiating With Vendor</span></td>
+        <td>6/23/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">157</td>
+        <td style="font-weight: 600; color: #0f172a;">GLOBAL BUILDESTATE PROJECTS PVT LTD</td>
+        <td>-</td>
+        <td style="font-weight: 600; color: #334155;">RamKrishna Pandey</td>
+        <td>6/23/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 1,08,74,675</td>
+        <td>6/27/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/23/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">169</td>
+        <td style="font-weight: 600; color: #0f172a;">Galactic</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>6/22/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 45,45,000</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>6/26/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">163</td>
+        <td style="font-weight: 600; color: #0f172a;">Lahoty Buildcon</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>6/20/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 21,50,000</td>
+        <td>6/26/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/26/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">155</td>
+        <td style="font-weight: 600; color: #0f172a;">GLC CHANDIGARH</td>
+        <td>-</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>6/20/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>6/20/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">156</td>
+        <td style="font-weight: 600; color: #0f172a;">Maisons-Super</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>6/19/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 3,65,647</td>
+        <td>6/20/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/23/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">153</td>
+        <td style="font-weight: 600; color: #0f172a;">Ideal Datacom (P) Ltd</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>6/19/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 7,41,000</td>
+        <td>6/25/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/19/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">165</td>
+        <td style="font-weight: 600; color: #0f172a;">RK ENTERPRISES</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Amit Gautam</td>
+        <td>6/18/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 8,00,000</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>6/26/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">149</td>
+        <td style="font-weight: 600; color: #0f172a;">Hindus than National Glass & Industries Ltd.</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aayushi</td>
+        <td>6/17/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 1,44,071</td>
+        <td>6/22/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>6/17/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">147</td>
+        <td style="font-weight: 600; color: #0f172a;">JK Cement Saifco Private Limited</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aayushi</td>
+        <td>6/17/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 3,28,922</td>
+        <td>6/2/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>6/17/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">146</td>
+        <td style="font-weight: 600; color: #0f172a;">Essar Constructions India Limited</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aayushi</td>
+        <td>6/17/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>6/17/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">161</td>
+        <td style="font-weight: 600; color: #0f172a;">GMCH</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>6/16/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 33,50,000</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>6/23/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">152</td>
+        <td style="font-weight: 600; color: #0f172a;">AIRIFFIC GROUP</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Aashu</td>
+        <td>6/16/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 3,67,14,275</td>
+        <td>6/20/2026</td>
+        <td><span class="cost-badge cost-progress">Revision In Progress</span></td>
+        <td>6/19/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">151</td>
+        <td style="font-weight: 600; color: #0f172a;">JK Cement Saifco Private Limited</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aayushi</td>
+        <td>6/16/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 94,00,000</td>
+        <td>6/17/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>6/17/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">150</td>
+        <td style="font-weight: 600; color: #0f172a;">PURE CEMENT</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aayushi</td>
+        <td>6/16/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 7,69,20,750</td>
+        <td>6/10/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>6/17/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">148</td>
+        <td style="font-weight: 600; color: #0f172a;">ARASMETA CEMENT PLANT,</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aayushi</td>
+        <td>6/16/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 7,09,900</td>
+        <td>6/17/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/17/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">142</td>
+        <td style="font-weight: 600; color: #0f172a;">EPE Process Filters & Accumulators Pvt. Ltd.</td>
+        <td>Deepak Janyani</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>6/16/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 2,50,07,000</td>
+        <td>6/20/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/16/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">141</td>
+        <td style="font-weight: 600; color: #0f172a;">studio LINEDESIGN</td>
+        <td>Deepak Janyani</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>6/16/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 5,22,31,700</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/16/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">143</td>
+        <td style="font-weight: 600; color: #0f172a;">KAILASH SONI</td>
+        <td>Deepak Janyani</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>6/15/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 2,08,850</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/16/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">139</td>
+        <td style="font-weight: 600; color: #0f172a;">CHIRAG ANJANA</td>
+        <td>-</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>6/13/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>6/13/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">168</td>
+        <td style="font-weight: 600; color: #0f172a;">ASA</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>6/12/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 13,30,000</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>6/26/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">154</td>
+        <td style="font-weight: 600; color: #0f172a;">Agrawal Group of Companies</td>
+        <td>-</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>6/12/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>6/20/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">160</td>
+        <td style="font-weight: 600; color: #0f172a;">Penta Energy</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>6/11/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 16,70,000</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>6/23/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">140</td>
+        <td style="font-weight: 600; color: #0f172a;">solsken</td>
+        <td>-</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>6/11/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>6/13/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">138</td>
+        <td style="font-weight: 600; color: #0f172a;">NVCL, Ahemdabad</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>6/11/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 4,41,195</td>
+        <td>7/6/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/11/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">137</td>
+        <td style="font-weight: 600; color: #0f172a;">J K CEMENT</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>6/11/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>6/11/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">136</td>
+        <td style="font-weight: 600; color: #0f172a;">APM PROJECTS PVT. LTD</td>
+        <td>-</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>6/10/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>6/11/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">135</td>
+        <td style="font-weight: 600; color: #0f172a;">Shree Cement Ltd., Pedagralapadu, Dachepalli (M), Palnadu (D)</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aayushi</td>
+        <td>6/10/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/11/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">134</td>
+        <td style="font-weight: 600; color: #0f172a;">Gautam solar power Pvt. Ltd.</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>6/10/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 17,30,14,268</td>
+        <td>7/8/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/11/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">167</td>
+        <td style="font-weight: 600; color: #0f172a;">Malani</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>6/9/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 4,21,000</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>6/26/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">132</td>
+        <td style="font-weight: 600; color: #0f172a;">Ultratech cement, birla white</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>6/9/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 4,70,300</td>
+        <td>6/23/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/11/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">129</td>
+        <td style="font-weight: 600; color: #0f172a;">Modren Construction</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>6/9/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 94,10,000</td>
+        <td>6/22/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/10/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">128</td>
+        <td style="font-weight: 600; color: #0f172a;">Modren Construction</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>6/9/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 39,07,100</td>
+        <td>6/11/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/10/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">127</td>
+        <td style="font-weight: 600; color: #0f172a;">Shree Cement Ltd | Gurugram</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>6/9/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 14,86,800</td>
+        <td>6/11/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/10/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">126</td>
+        <td style="font-weight: 600; color: #0f172a;">Nahar Industrial Enterprises Ltd</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">RamKrishna Pandey</td>
+        <td>6/9/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 25,98,400</td>
+        <td>6/13/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/9/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">166</td>
+        <td style="font-weight: 600; color: #0f172a;">Stonex</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>6/6/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 2,37,24,847</td>
+        <td>6/29/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>6/26/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">133</td>
+        <td style="font-weight: 600; color: #0f172a;">Stonex</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>6/6/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 2,35,36,039</td>
+        <td>6/20/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/11/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">130</td>
+        <td style="font-weight: 600; color: #0f172a;">Innomotics</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">RamKrishna Pandey</td>
+        <td>6/5/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 1,39,73,800</td>
+        <td>6/13/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/11/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">125</td>
+        <td style="font-weight: 600; color: #0f172a;">Industrial Pumps</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Aditya Soni</td>
+        <td>6/5/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 75,776</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/6/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">118</td>
+        <td style="font-weight: 600; color: #0f172a;">J K CEMENT</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aayushi</td>
+        <td>6/5/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 64,18,841</td>
+        <td>6/12/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>6/5/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">123</td>
+        <td style="font-weight: 600; color: #0f172a;">Moduluhousing</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Aditya Soni</td>
+        <td>6/4/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 74,914</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/6/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">121</td>
+        <td style="font-weight: 600; color: #0f172a;">AKSHAR SOLAR PVT LTD</td>
+        <td>-</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>6/4/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>6/5/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">120</td>
+        <td style="font-weight: 600; color: #0f172a;">ASA SOLAR PRIVATE LIMITED</td>
+        <td>-</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>6/4/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>6/5/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">145</td>
+        <td style="font-weight: 600; color: #0f172a;">PURE CEMENT</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aayushi</td>
+        <td>6/3/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 2,48,88,535</td>
+        <td>6/10/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/17/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">124</td>
+        <td style="font-weight: 600; color: #0f172a;">Ashiana Housing</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>6/3/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>6/6/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">113</td>
+        <td style="font-weight: 600; color: #0f172a;">ELETRONIC INSTRUMENTS</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>6/3/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 3,79,998</td>
+        <td>6/3/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/5/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">131</td>
+        <td style="font-weight: 600; color: #0f172a;">Ultratech cement, Nathdwara</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>6/2/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 8,09,141</td>
+        <td>6/12/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>6/11/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">122</td>
+        <td style="font-weight: 600; color: #0f172a;">Rays Expert</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>6/2/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>6/6/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">117</td>
+        <td style="font-weight: 600; color: #0f172a;">sper India Group</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aashu</td>
+        <td>6/2/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 2,82,900</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/5/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">116</td>
+        <td style="font-weight: 600; color: #0f172a;">PERFECT ENTERPRISES</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>6/2/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 3,35,000</td>
+        <td>6/19/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>6/5/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">111</td>
+        <td style="font-weight: 600; color: #0f172a;">Reliance</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>6/2/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 1,56,700</td>
+        <td>6/5/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/4/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">112</td>
+        <td style="font-weight: 600; color: #0f172a;">Prasheetan Aircon</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>6/1/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 30,25,000</td>
+        <td>6/4/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>6/5/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">115</td>
+        <td style="font-weight: 600; color: #0f172a;">Process & Machines Automation systems</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>5/30/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 1,60,67,940</td>
+        <td>7/3/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>6/5/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">109</td>
+        <td style="font-weight: 600; color: #0f172a;">Vikas Trading Corporation</td>
+        <td>gopal singh</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>5/29/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 14,42,000</td>
+        <td>6/3/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/29/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">114</td>
+        <td style="font-weight: 600; color: #0f172a;">VETO GROUP</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>5/28/2026</td>
+        <td style="text-align: center;"><span class="badge badge-lost">Lost</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 1,41,58,700</td>
+        <td>6/4/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>6/5/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">108</td>
+        <td style="font-weight: 600; color: #0f172a;">NAVYA ENTERPRISES</td>
+        <td>-</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/28/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/29/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">105</td>
+        <td style="font-weight: 600; color: #0f172a;">SEFRICODE</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>5/27/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 10,80,000</td>
+        <td>5/28/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>5/28/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">104</td>
+        <td style="font-weight: 600; color: #0f172a;">MAHARAJA SOLAR</td>
+        <td>-</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/27/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/27/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">101</td>
+        <td style="font-weight: 600; color: #0f172a;">landsmill Green Energy Ltd.</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>5/26/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 3,00,73,600</td>
+        <td>9/6/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/26/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">100</td>
+        <td style="font-weight: 600; color: #0f172a;">MACH ENTERPRISES</td>
+        <td>-</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>5/26/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 36,83,200</td>
+        <td>5/29/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/26/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">99</td>
+        <td style="font-weight: 600; color: #0f172a;">APEX HOSPITAL</td>
+        <td>-</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/26/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/26/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">98</td>
+        <td style="font-weight: 600; color: #0f172a;">MAP Engineers & Consultants Pvt. Ltd.</td>
+        <td>gopal singh</td>
+        <td style="font-weight: 600; color: #334155;">Pavan Kumar</td>
+        <td>5/26/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 10,33,334</td>
+        <td>5/30/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/26/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">106</td>
+        <td style="font-weight: 600; color: #0f172a;">Ashadeep</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/25/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/28/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">103</td>
+        <td style="font-weight: 600; color: #0f172a;">Genus Power Infrastructures Ltd</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>5/25/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 37,42,100</td>
+        <td>5/29/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/26/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">95</td>
+        <td style="font-weight: 600; color: #0f172a;">Stylenest India Limited</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Bharat</td>
+        <td>5/24/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 5,19,400</td>
+        <td>6/27/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/24/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">94</td>
+        <td style="font-weight: 600; color: #0f172a;">Dynamic cables limited</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>5/23/2026</td>
+        <td style="text-align: center;"><span class="badge badge-lost">Lost</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 89,86,203</td>
+        <td>7/2/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>5/24/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">93</td>
+        <td style="font-weight: 600; color: #0f172a;">Tenco system</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>5/23/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 75,19,616.20</td>
+        <td>5/28/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/23/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">92</td>
+        <td style="font-weight: 600; color: #0f172a;">GA INFRA</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Amit Gautam</td>
+        <td>5/22/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 77,00,000</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/23/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">97</td>
+        <td style="font-weight: 600; color: #0f172a;">Aditya Techno</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>5/21/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 93,48,900</td>
+        <td>5/26/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/25/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">85</td>
+        <td style="font-weight: 600; color: #0f172a;">Gravita</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/21/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/21/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">90</td>
+        <td style="font-weight: 600; color: #0f172a;">Tenco system</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>5/20/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 3,23,79,600</td>
+        <td>5/28/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/22/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">89</td>
+        <td style="font-weight: 600; color: #0f172a;">Manipal Academy of Higher Education</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>5/19/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 8,77,413</td>
+        <td>5/21/2026</td>
+        <td><span class="cost-badge cost-vendor">Negotiating With Vendor</span></td>
+        <td>5/21/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">87</td>
+        <td style="font-weight: 600; color: #0f172a;">KSP Hydro Engineer Pvt. Ltd.</td>
+        <td>Deepak Janyani</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>5/19/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 8,50,915</td>
+        <td>5/30/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/21/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">84</td>
+        <td style="font-weight: 600; color: #0f172a;">Modren Construction</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>5/19/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 53,78,400</td>
+        <td>5/21/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/20/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">83</td>
+        <td style="font-weight: 600; color: #0f172a;">Ultratech cement, reddipalayam, TN</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aashu</td>
+        <td>5/19/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 7,08,700</td>
+        <td>5/26/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>5/20/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">82</td>
+        <td style="font-weight: 600; color: #0f172a;">NAVYA ENTERPRISES</td>
+        <td>-</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/19/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/19/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">81</td>
+        <td style="font-weight: 600; color: #0f172a;">Shree Cement Ltd | Gurugram</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aashu</td>
+        <td>5/18/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 11,11,800</td>
+        <td>5/23/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/19/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">78</td>
+        <td style="font-weight: 600; color: #0f172a;">Ostwal</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/18/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/18/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">74</td>
+        <td style="font-weight: 600; color: #0f172a;">Maisons-Super</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>5/18/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 8,59,320</td>
+        <td>5/22/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/18/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">110</td>
+        <td style="font-weight: 600; color: #0f172a;">Shree Cement Ltd | Gurugram</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>5/17/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/30/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">73</td>
+        <td style="font-weight: 600; color: #0f172a;">Garg Residence, Jaipur</td>
+        <td>gopal singh</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>5/16/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 12,54,700</td>
+        <td>5/21/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/16/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">88</td>
+        <td style="font-weight: 600; color: #0f172a;">Ultratech cement, birla white</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Bharat</td>
+        <td>5/15/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 70,20,200</td>
+        <td>5/26/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/21/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">76</td>
+        <td style="font-weight: 600; color: #0f172a;">HG Infra</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/15/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/18/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">80</td>
+        <td style="font-weight: 600; color: #0f172a;">Ravendra singh</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/14/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 3,15,708</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/19/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">71</td>
+        <td style="font-weight: 600; color: #0f172a;">SAPL</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Bharat</td>
+        <td>5/14/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 45,33,400</td>
+        <td>5/19/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/15/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">68</td>
+        <td style="font-weight: 600; color: #0f172a;">APM PROJECTS PVT. LTD</td>
+        <td>-</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/14/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/14/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">77</td>
+        <td style="font-weight: 600; color: #0f172a;">Vivanta</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/13/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/18/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">66</td>
+        <td style="font-weight: 600; color: #0f172a;">Tenco system</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/13/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/13/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">64</td>
+        <td style="font-weight: 600; color: #0f172a;">RHETRONIC</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>5/13/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 57,88,917</td>
+        <td>5/16/2026</td>
+        <td><span class="cost-badge cost-progress">Revision In Progress</span></td>
+        <td>5/13/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">61</td>
+        <td style="font-weight: 600; color: #0f172a;">Global Aircon</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Aashu</td>
+        <td>5/13/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 38,66,300</td>
+        <td>5/20/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/13/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">102</td>
+        <td style="font-weight: 600; color: #0f172a;">Schneider electric</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>5/12/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 2,15,50,400</td>
+        <td>6/3/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>5/26/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">72</td>
+        <td style="font-weight: 600; color: #0f172a;">Prasheetan Aircon</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>5/12/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 2,30,000</td>
+        <td>5/15/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>5/15/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">62</td>
+        <td style="font-weight: 600; color: #0f172a;">Advance Agro</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/12/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 4,32,000</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/13/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">56</td>
+        <td style="font-weight: 600; color: #0f172a;">Maisons-Super</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>5/12/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 7,36,004</td>
+        <td>5/13/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/13/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">50</td>
+        <td style="font-weight: 600; color: #0f172a;">Poddar Pigment Ltd</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aayushi</td>
+        <td>5/12/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 2,95,000</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/12/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">46</td>
+        <td style="font-weight: 600; color: #0f172a;">Sudha engi tech</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>5/12/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 35,92,200</td>
+        <td>5/13/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/12/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">44</td>
+        <td style="font-weight: 600; color: #0f172a;">AEKUM HUB</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>5/12/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 5,43,000</td>
+        <td>5/12/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>5/12/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">86</td>
+        <td style="font-weight: 600; color: #0f172a;">Shree Hari Infra</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/11/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/21/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">65</td>
+        <td style="font-weight: 600; color: #0f172a;">Teren Power</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/11/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/13/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">59</td>
+        <td style="font-weight: 600; color: #0f172a;">Bosch</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/11/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/13/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">58</td>
+        <td style="font-weight: 600; color: #0f172a;">KGK</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/11/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/13/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">57</td>
+        <td style="font-weight: 600; color: #0f172a;">MAP Engineers & Consultants Pvt. Ltd.</td>
+        <td>gopal singh</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>5/11/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 35,97,762</td>
+        <td>5/13/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/13/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">55</td>
+        <td style="font-weight: 600; color: #0f172a;">Reliance</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>5/11/2026</td>
+        <td style="text-align: center;"><span class="badge badge-lost">Lost</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 4,04,100</td>
+        <td>5/12/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>5/13/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">51</td>
+        <td style="font-weight: 600; color: #0f172a;">J K CEMENT</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aayushi</td>
+        <td>5/11/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 15,60,000</td>
+        <td>5/11/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/12/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">49</td>
+        <td style="font-weight: 600; color: #0f172a;">La Reliant Aluminium Pvt Ltd</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>5/11/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 8,01,52,848</td>
+        <td>7/8/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>5/12/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">43</td>
+        <td style="font-weight: 600; color: #0f172a;">KS Engineering</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>5/9/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 62,00,000</td>
+        <td>5/19/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/9/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">38</td>
+        <td style="font-weight: 600; color: #0f172a;">JAN KALYAN HOSPITAL</td>
+        <td>-</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/9/2026</td>
+        <td style="text-align: center;"><span class="badge badge-neg">Under Negotiation</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/9/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">48</td>
+        <td style="font-weight: 600; color: #0f172a;">Schneider electric</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>5/8/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 60,19,567</td>
+        <td>5/14/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/12/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">40</td>
+        <td style="font-weight: 600; color: #0f172a;">Potaliya Enterprises Pvt. Ltd</td>
+        <td>-</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/8/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/9/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">69</td>
+        <td style="font-weight: 600; color: #0f172a;">Prasheetan Aircon</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/7/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/14/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">30</td>
+        <td style="font-weight: 600; color: #0f172a;">NOBEL ENGINEERS</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>5/7/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 27,22,000</td>
+        <td>5/14/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/7/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">27</td>
+        <td style="font-weight: 600; color: #0f172a;">L&T Construction</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>5/7/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 1,03,52,300</td>
+        <td>5/23/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/7/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">52</td>
+        <td style="font-weight: 600; color: #0f172a;">PURE CEMENT</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aayushi</td>
+        <td>5/6/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 7,60,68,123</td>
+        <td>6/10/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>5/12/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">34</td>
+        <td style="font-weight: 600; color: #0f172a;">RBL</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aashu</td>
+        <td>5/6/2026</td>
+        <td style="text-align: center;"><span class="badge badge-neg">Under Negotiation</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 14,47,100</td>
+        <td>5/9/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/7/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">33</td>
+        <td style="font-weight: 600; color: #0f172a;">RBL</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/6/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/7/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">29</td>
+        <td style="font-weight: 600; color: #0f172a;">Ultratech Cement, Sewagram Cement Works, Vayor, Kutch (Bhuj)</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/6/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/7/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">24</td>
+        <td style="font-weight: 600; color: #0f172a;">AWASTHI ELECTRIC</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>5/6/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 24,52,100</td>
+        <td>5/13/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/7/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">23</td>
+        <td style="font-weight: 600; color: #0f172a;">Nuelpro Technologies Pvt Ltd</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/6/2026</td>
+        <td style="text-align: center;"><span class="badge badge-neg">Under Negotiation</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/7/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">20</td>
+        <td style="font-weight: 600; color: #0f172a;">Abhilasha Enterprises</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>5/6/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 23,42,853</td>
+        <td>6/25/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/7/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">19</td>
+        <td style="font-weight: 600; color: #0f172a;">J K CEMENT</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>5/6/2026</td>
+        <td style="text-align: center;"><span class="badge badge-lost">Lost</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/6/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">47</td>
+        <td style="font-weight: 600; color: #0f172a;">Ultratech cement, aditya cement, chittorgarh</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>5/5/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 9,12,800</td>
+        <td>0026-05-13</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>5/12/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">45</td>
+        <td style="font-weight: 600; color: #0f172a;">Global Aircon</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>5/5/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 8,14,800</td>
+        <td>5/9/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>5/12/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">42</td>
+        <td style="font-weight: 600; color: #0f172a;">Naresh Kumar Gupta & Co.</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Deepak Janyani</td>
+        <td>5/5/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 2,56,73,000</td>
+        <td>5/9/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/9/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">28</td>
+        <td style="font-weight: 600; color: #0f172a;">HERO MOTO CORP</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>5/5/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 4,82,446</td>
+        <td>5/7/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/7/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">26</td>
+        <td style="font-weight: 600; color: #0f172a;">INA Solar, Narmadapuram, Cell plant</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>5/5/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 4,44,60,060</td>
+        <td>5/11/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>5/7/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">22</td>
+        <td style="font-weight: 600; color: #0f172a;">Lahoty Buildcon</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>5/3/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 93,50,000</td>
+        <td>5/7/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>5/7/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">79</td>
+        <td style="font-weight: 600; color: #0f172a;">Dmart</td>
+        <td>mohan shyam</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/2/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 25,72,000</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/18/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">53</td>
+        <td style="font-weight: 600; color: #0f172a;">RSWM Limited</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>5/2/2026</td>
+        <td style="text-align: center;"><span class="badge badge-pend">Pending</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/12/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">15</td>
+        <td style="font-weight: 600; color: #0f172a;">Maisons-Super</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>5/2/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 9,85,000</td>
+        <td>5/5/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>5/6/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">54</td>
+        <td style="font-weight: 600; color: #0f172a;">PURE CEMENT</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Aayushi</td>
+        <td>5/1/2026</td>
+        <td style="text-align: center;"><span class="badge badge-tech">Tech Qualified</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>5/12/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">39</td>
+        <td style="font-weight: 600; color: #0f172a;">Renew Pro Energy</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Amit Gautam</td>
+        <td>5/1/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 18,25,000</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/9/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">37</td>
+        <td style="font-weight: 600; color: #0f172a;">Satish Chand Rajesh Kumar Pvt, Ltd</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>5/1/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 5,40,000</td>
+        <td>5/5/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/8/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">32</td>
+        <td style="font-weight: 600; color: #0f172a;">PURE CEMENT</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>5/1/2026</td>
+        <td style="text-align: center;"><span class="badge badge-neg">Under Negotiation</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 7,23,77,822</td>
+        <td>6/10/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/7/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">14</td>
+        <td style="font-weight: 600; color: #0f172a;">Microtek</td>
+        <td>Bhupender Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>4/30/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 4,38,59,000</td>
+        <td>5/12/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/4/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">13</td>
+        <td style="font-weight: 600; color: #0f172a;">J K CEMENT</td>
+        <td>Puneet Sharma</td>
+        <td style="font-weight: 600; color: #334155;">Rakesh</td>
+        <td>4/30/2026</td>
+        <td style="text-align: center;"><span class="badge badge-neg">Under Negotiation</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 30,30,600</td>
+        <td>5/4/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>4/30/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">10</td>
+        <td style="font-weight: 600; color: #0f172a;">Shri Ahimsa Naturals Ltd.</td>
+        <td>-</td>
+        <td style="font-weight: 600; color: #334155;">Unassigned</td>
+        <td>4/29/2026</td>
+        <td style="text-align: center;"><span class="badge badge-lost">Lost</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">-</td>
+        <td>-</td>
+        <td><span class="cost-badge cost-pending">Pending</span></td>
+        <td>4/29/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">16</td>
+        <td style="font-weight: 600; color: #0f172a;">SEFRICODE</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>4/24/2026</td>
+        <td style="text-align: center;"><span class="badge badge-quoted">Quoted</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 85,99,000</td>
+        <td>5/5/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>5/6/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">17</td>
+        <td style="font-weight: 600; color: #0f172a;">Babu Lal Kumawat</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>4/20/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 1,98,000</td>
+        <td>5/2/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>5/6/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">36</td>
+        <td style="font-weight: 600; color: #0f172a;">MCC Corporation</td>
+        <td>Amit Gautam</td>
+        <td style="font-weight: 600; color: #334155;">Akhilesh</td>
+        <td>4/15/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 14,75,000</td>
+        <td>5/1/2026</td>
+        <td><span class="cost-badge cost-done">Done</span></td>
+        <td>5/8/2026</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: 700; color: #475569;">18</td>
+        <td style="font-weight: 600; color: #0f172a;">Manipal University</td>
+        <td>Anil Yadav</td>
+        <td style="font-weight: 600; color: #334155;">Anil Yadav</td>
+        <td>3/21/2026</td>
+        <td style="text-align: center;"><span class="badge badge-won">Won</span></td>
+        <td style="text-align: right; font-weight: 700; color: #0369a1; font-family: monospace;">₹ 60,32,420</td>
+        <td>4/18/2026</td>
+        <td><span class="cost-badge cost-revised">Revised Offer Submitted</span></td>
+        <td>5/6/2026</td>
+      </tr>
+    </tbody>
+  </table>
+
+</body>
+</html>
