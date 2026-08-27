@@ -124,6 +124,7 @@ def generate_pdf():
         g_done_pct = (g_done / g_assigned * 100) if g_assigned > 0 else 0
         
         g_won = (group['Current Status Lower'] == 'won').sum()
+        g_pending_leads = (group['Current Status Lower'] == 'pending').sum()
         g_won_money = group[group['Current Status Lower'] == 'won']['Offer Price Num'].sum()
         g_total_money = group['Offer Price Num'].sum()
         
@@ -139,6 +140,7 @@ def generate_pdf():
             "pending": g_pending,
             "done_pct": g_done_pct,
             "won": g_won,
+            "pending_leads": g_pending_leads,
             "total_money": g_total_money,
             "won_money": g_won_money
         })
@@ -152,6 +154,7 @@ def generate_pdf():
     total_sum_done = sum(s['done'] for s in summary_data)
     total_sum_pending = sum(s['pending'] for s in summary_data)
     total_sum_won = sum(s['won'] for s in summary_data)
+    total_sum_pending_leads = sum(s['pending_leads'] for s in summary_data)
     total_sum_money = sum(s['total_money'] for s in summary_data)
     total_sum_won_money = sum(s['won_money'] for s in summary_data)
 
@@ -164,6 +167,7 @@ def generate_pdf():
             <td class="text-center font-bold" style="color: #b45309;"><span class="cost-badge cost-pending">{s['pending']}</span></td>
             <td class="text-center font-bold"><span class="cost-badge cost-submitted">{s['done_pct']:.1f}%</span></td>
             <td class="text-center font-bold" style="color: #16a34a;">{s['won']}</td>
+            <td class="text-center font-bold" style="color: #b45309;"><span class="badge badge-pending">{s['pending_leads']}</span></td>
             <td class="text-right font-mono price-cell">{format_inr(s['total_money'])}</td>
             <td class="text-right font-mono" style="color: #166534; font-weight: 700;">{format_inr(s['won_money'])}</td>
         </tr>
@@ -178,6 +182,7 @@ def generate_pdf():
         <td class="text-center font-bold" style="color: #b45309;">{total_sum_pending}</td>
         <td class="text-center font-bold">{(total_sum_done/total_sum_assigned*100):.1f}%</td>
         <td class="text-center font-bold" style="color: #16a34a;">{total_sum_won}</td>
+        <td class="text-center font-bold" style="color: #b45309;">{total_sum_pending_leads}</td>
         <td class="text-right font-mono font-bold">{format_inr(total_sum_money)}</td>
         <td class="text-right font-mono font-bold" style="color: #166534;">{format_inr(total_sum_won_money)}</td>
     </tr>
@@ -355,6 +360,7 @@ def generate_pdf():
             <th class="text-center">Costings Pending</th>
             <th class="text-center">Completion %</th>
             <th class="text-center">Orders Won</th>
+            <th class="text-center">Pending Leads</th>
             <th class="text-right">Total Value Quoted</th>
             <th class="text-right">Total Value Won</th>
         </tr>
