@@ -47,6 +47,7 @@ export default function Dashboard() {
   const [selectedMonth, setSelectedMonth] = useState('All');
   const [selectedEngineer, setSelectedEngineer] = useState('All');
   const [selectedSalesPerson, setSelectedSalesPerson] = useState('All');
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   React.useEffect(() => {
     fetch('/api/dashboard-data')
@@ -196,6 +197,43 @@ export default function Dashboard() {
     };
   }, [filteredLeads]);
 
+  const handleDownloadPdf = async () => {
+    if (isGeneratingPdf) return;
+    setIsGeneratingPdf(true);
+    try {
+      const { generateFilteredPdf } = await import('../utils/generatePdfReport');
+
+      let periodLabel = 'All Records';
+      if (selectedMonth !== 'All') {
+        periodLabel = selectedMonth;
+      } else if (selectedWeek === 'LATEST') {
+        const latestWeek = weeks.length > 0 ? weeks[0].label : 'Latest Week';
+        periodLabel = `Latest Week (${latestWeek})`;
+      } else if (selectedWeek !== 'All') {
+        const wObj = weeks.find(w => w.key === selectedWeek);
+        periodLabel = wObj ? wObj.label : selectedWeek;
+      } else if (selectedEngineer !== 'All') {
+        periodLabel = `Engineer: ${selectedEngineer}`;
+      } else if (selectedSalesPerson !== 'All') {
+        periodLabel = `Sales: ${selectedSalesPerson}`;
+      }
+
+      await generateFilteredPdf(filteredLeads, {
+        periodLabel,
+        month: selectedMonth,
+        week: selectedWeek,
+        weekLabel: selectedWeek !== 'All' ? (weeks.find(w => w.key === selectedWeek)?.label || selectedWeek) : '',
+        engineer: selectedEngineer,
+        salesPerson: selectedSalesPerson
+      });
+    } catch (err) {
+      console.error('Failed to generate filtered PDF report:', err);
+      window.open('/costing_report.pdf', '_blank');
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-white">Loading live data...</div>;
   }
@@ -324,16 +362,17 @@ export default function Dashboard() {
             </button>
           )}
 
-          <a
-            href="/costing_report.pdf"
-            download="Costing_Report.pdf"
-            className="text-[11px] bg-rose-600 hover:bg-rose-500 text-white font-semibold px-2.5 py-1 rounded flex items-center gap-1 transition-colors shadow-sm ml-1"
+          <button
+            onClick={handleDownloadPdf}
+            disabled={isGeneratingPdf}
+            title={selectedMonth !== 'All' ? `Download ${selectedMonth} PDF Report` : selectedWeek !== 'All' ? 'Download Filtered Week PDF Report' : 'Download Complete PDF Report'}
+            className="text-[11px] bg-rose-600 hover:bg-rose-500 text-white font-semibold px-2.5 py-1 rounded flex items-center gap-1 transition-colors shadow-sm ml-1 disabled:opacity-50 cursor-pointer"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
             </svg>
-            PDF
-          </a>
+            {isGeneratingPdf ? 'Generating...' : 'PDF'}
+          </button>
         </div>
       </header>
 

@@ -84,15 +84,26 @@ export async function GET() {
       const monthYear = enqDate.toLocaleString('default', { month: 'long', year: 'numeric' });
       const weekInfo = getSundayWeek(enqDate);
 
+      const formatDateStr = (val) => {
+        if (!val) return '-';
+        const d = parseDate(val);
+        if (isNaN(d.getTime())) return String(val);
+        return d.toISOString().split('T')[0];
+      };
+
       leads.push({
-        id: row.ID || Math.random(),
+        id: rawId,
         client: customer || 'Unknown',
         engineer: assignedTo,
         salesPerson: salesPerson || 'Unassigned',
         currentStatus,
         costingStatus,
+        costingAccepted: String(row['costing accepted or rejected'] || '').trim(),
+        costingAcceptedDate: formatDateStr(row['Costing accepted date']),
+        completionDate: formatDateStr(row['Costing completion date']),
         offerPrice,
         enqDate: enqDate.toISOString(),
+        enqDateRaw: formatDateStr(row['Enquiry Date']),
         monthYear,
         weekKey: weekInfo.weekKey,
         weekLabel: weekInfo.weekLabel,
