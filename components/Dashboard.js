@@ -198,40 +198,50 @@ export default function Dashboard() {
   }, [filteredLeads]);
 
   const handleDownloadPdf = async () => {
-    if (isGeneratingPdf) return;
-    setIsGeneratingPdf(true);
-    try {
-      const { generateFilteredPdf } = await import('../utils/generatePdfReport');
-
-      let periodLabel = 'All Records';
-      if (selectedMonth !== 'All') {
-        periodLabel = selectedMonth;
-      } else if (selectedWeek === 'LATEST') {
-        const latestWeek = weeks.length > 0 ? weeks[0].label : 'Latest Week';
-        periodLabel = `Latest Week (${latestWeek})`;
-      } else if (selectedWeek !== 'All') {
-        const wObj = weeks.find(w => w.key === selectedWeek);
-        periodLabel = wObj ? wObj.label : selectedWeek;
-      } else if (selectedEngineer !== 'All') {
-        periodLabel = `Engineer: ${selectedEngineer}`;
-      } else if (selectedSalesPerson !== 'All') {
-        periodLabel = `Sales: ${selectedSalesPerson}`;
-      }
-
-      await generateFilteredPdf(filteredLeads, {
-        periodLabel,
-        month: selectedMonth,
-        week: selectedWeek,
-        weekLabel: selectedWeek !== 'All' ? (weeks.find(w => w.key === selectedWeek)?.label || selectedWeek) : '',
-        engineer: selectedEngineer,
-        salesPerson: selectedSalesPerson
-      });
-    } catch (err) {
-      console.error('Failed to generate filtered PDF report:', err);
-      window.open('/costing_report.pdf', '_blank');
-    } finally {
-      setIsGeneratingPdf(false);
+    // 1. If a specific month is selected
+    if (selectedMonth !== 'All' && selectedWeek === 'All' && selectedEngineer === 'All' && selectedSalesPerson === 'All') {
+      const slug = selectedMonth.toLowerCase().replace(/\s+/g, '_');
+      const filename = `Costing_Report_${selectedMonth.replace(/\s+/g, '_')}.pdf`;
+      const link = document.createElement('a');
+      link.href = `/reports/costing_report_${slug}.pdf`;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
     }
+
+    // 2. If Latest Week is selected
+    if (selectedWeek === 'LATEST' && selectedMonth === 'All' && selectedEngineer === 'All' && selectedSalesPerson === 'All') {
+      const link = document.createElement('a');
+      link.href = `/reports/costing_report_latest_week.pdf`;
+      link.download = `Costing_Report_Latest_Week.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
+
+    // 3. If All Records (no filter)
+    if (selectedWeek === 'All' && selectedMonth === 'All' && selectedEngineer === 'All' && selectedSalesPerson === 'All') {
+      const link = document.createElement('a');
+      link.href = `/costing_report.pdf`;
+      link.download = `Costing_Report_All.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
+
+    // 4. Custom filter combination -> open print-to-PDF window with 100% exact HTML & CSS layout
+    const { openExactHtmlPrintReport } = await import('../utils/printExactHtmlReport');
+    openExactHtmlPrintReport(filteredLeads, {
+      month: selectedMonth,
+      week: selectedWeek,
+      engineer: selectedEngineer,
+      salesPerson: selectedSalesPerson,
+      weekLabel: selectedWeek !== 'All' ? (weeks.find(w => w.key === selectedWeek)?.label || selectedWeek) : ''
+    });
   };
 
   if (loading) {

@@ -2,89 +2,64 @@ import pandas as pd
 import html
 import os
 import glob
+import shutil
 from playwright.sync_api import sync_playwright
 
-def generate_pdf():
-    # Find latest csv in the dashboard folder
-    csv_files = glob.glob('costing-report*.csv')
-    if not csv_files:
-        print("No CSV found.")
-        return
-    csv_path = max(csv_files, key=os.path.getctime)
-    df = pd.read_csv(csv_path)
+def format_inr(val):
+    if pd.isna(val) or val == '' or val == 0:
+        return '-'
+    try:
+        val = float(val)
+        parts = f'{val:.2f}'.split('.')
+        int_part = parts[0]
+        dec_part = parts[1]
+        if len(int_part) <= 3:
+            res = int_part
+        else:
+            last3 = int_part[-3:]
+            rest = int_part[:-3]
+            groups = []
+            while len(rest) > 2:
+                groups.insert(0, rest[-2:])
+                rest = rest[:-2]
+            if rest:
+                groups.insert(0, rest)
+            res = ','.join(groups) + ',' + last3
+        if dec_part == '00':
+            return '₹ ' + res
+        return '₹ ' + res + '.' + dec_part
+    except:
+        return str(val)
 
-    # Filter out blank rows, summary rows (e.g. "Total Rows", "Total Leads", etc.), and non-numeric IDs
-    df['ID_num'] = pd.to_numeric(df.iloc[:, 0], errors='coerce')
-    df = df.dropna(subset=['ID_num'])
-    df['ID'] = df['ID_num'].astype(int)
+def format_status(val):
+    if pd.isna(val): return '-'
+    val_str = str(val).strip()
+    status_lower = val_str.lower()
+    label = val_str.replace('_', ' ').title()
+    badge_class = 'badge-default'
+    if status_lower == 'won': badge_class = 'badge-won'
+    elif status_lower == 'quoted': badge_class = 'badge-quoted'
+    elif 'negotiat' in status_lower: badge_class = 'badge-negotiation'
+    elif status_lower == 'pending': badge_class = 'badge-pending'
+    elif status_lower == 'lost': badge_class = 'badge-lost'
+    elif 'tech' in status_lower: badge_class = 'badge-tech'
+    return f'<span class="badge {badge_class}">{html.escape(label)}</span>'
 
-    # Filter out any summary rows in Customer column
-    cust_str = df['Customer'].astype(str).str.strip().str.lower()
-    df = df[~cust_str.str.startswith('total ')]
-    df = df[~cust_str.isin(['total rows', 'total leads', 'total users', 'total statuses', 'total offer price', 'nan', '', '-'])]
+def format_costing_status(val):
+    if pd.isna(val): return '-'
+    val_str = str(val).strip()
+    label = val_str.replace('_', ' ').title()
+    badge_class = 'cost-default'
+    if val_str.lower() == 'done':
+        label = 'First Offer Submitted'
+        badge_class = 'cost-done'
+    elif val_str.lower() in ['revised_offer_submitted', 'submitted', 'accepted']: badge_class = 'cost-submitted'
+    elif val_str.lower() == 'pending': badge_class = 'cost-pending'
+    elif 'progress' in val_str.lower() or 'negotiat' in val_str.lower(): badge_class = 'cost-progress'
+    elif 'query' in val_str.lower() or 'rejected' in val_str.lower(): badge_class = 'cost-query'
+    return f'<span class="cost-badge {badge_class}">{html.escape(label)}</span>'
 
-    # Clean Assigned To
-    df['Assigned To'] = df['Assigned To'].fillna('Unassigned').astype(str).str.strip()
-    df['Assigned To'] = df['Assigned To'].replace(r'^\s*$', 'Unassigned', regex=True)
-
-    # Sort by enquiry date, latest first
-    df['Enquiry Date dt'] = pd.to_datetime(df['Enquiry Date'], errors='coerce')
-    df = df.sort_values(by=['Enquiry Date dt', 'ID'], ascending=[False, False])
-
-    def format_inr(val):
-        if pd.isna(val) or val == '' or val == 0:
-            return '-'
-        try:
-            val = float(val)
-            parts = f'{val:.2f}'.split('.')
-            int_part = parts[0]
-            dec_part = parts[1]
-            if len(int_part) <= 3:
-                res = int_part
-            else:
-                last3 = int_part[-3:]
-                rest = int_part[:-3]
-                groups = []
-                while len(rest) > 2:
-                    groups.insert(0, rest[-2:])
-                    rest = rest[:-2]
-                if rest:
-                    groups.insert(0, rest)
-                res = ','.join(groups) + ',' + last3
-            if dec_part == '00':
-                return '₹ ' + res
-            return '₹ ' + res + '.' + dec_part
-        except:
-            return str(val)
-
-    def format_status(val):
-        if pd.isna(val): return '-'
-        val_str = str(val).strip()
-        label = val_str.replace('_', ' ').title()
-        badge_class = 'badge-default'
-        if val_str.lower() == 'won': badge_class = 'badge-won'
-        elif val_str.lower() == 'quoted': badge_class = 'badge-quoted'
-        elif val_str.lower() == 'under_negotiation': badge_class = 'badge-negotiation'
-        elif val_str.lower() == 'pending': badge_class = 'badge-pending'
-        elif val_str.lower() == 'lost': badge_class = 'badge-lost'
-        elif 'tech' in val_str.lower(): badge_class = 'badge-tech'
-        return f'<span class="badge {badge_class}">{html.escape(label)}</span>'
-
-    def format_costing_status(val):
-        if pd.isna(val): return '-'
-        val_str = str(val).strip()
-        label = val_str.replace('_', ' ').title()
-        badge_class = 'cost-default'
-        if val_str.lower() == 'done':
-            label = 'First Offer Submitted'
-            badge_class = 'cost-done'
-        elif val_str.lower() in ['revised_offer_submitted', 'submitted', 'accepted']: badge_class = 'cost-submitted'
-        elif val_str.lower() == 'pending': badge_class = 'cost-pending'
-        elif 'progress' in val_str.lower() or 'negotiat' in val_str.lower(): badge_class = 'cost-progress'
-        elif 'query' in val_str.lower() or 'rejected' in val_str.lower(): badge_class = 'cost-query'
-        return f'<span class="cost-badge {badge_class}">{html.escape(label)}</span>'
-
-    df['Current Status Lower'] = df['Current Status'].astype(str).str.lower()
+def generate_html_content(df, period_label):
     total_leads = len(df)
     won_count = (df['Current Status Lower'] == 'won').sum()
     quoted_count = (df['Current Status Lower'] == 'quoted').sum()
@@ -92,14 +67,9 @@ def generate_pdf():
     negotiation_count = (df['Current Status Lower'] == 'under_negotiation').sum()
     lost_count = (df['Current Status Lower'] == 'lost').sum()
 
-    df['Offer Price Num'] = pd.to_numeric(df['Offer Price'], errors='coerce').fillna(0)
     total_pipeline = df['Offer Price Num'].sum()
     won_value = df[df['Current Status Lower'] == 'won']['Offer Price Num'].sum()
     quoted_value = df[df['Current Status Lower'] == 'quoted']['Offer Price Num'].sum()
-
-    # Costing Done rule: Costing Status not in ['pending', 'revision_in_progress', '']
-    df['Costing Status Lower'] = df['Costing Status'].astype(str).str.lower().str.strip()
-    df['is_costing_done'] = ~df['Costing Status Lower'].isin(['pending', 'revision_in_progress', ''])
 
     # CALCULATE HIGHEST NUMBER OF COSTING DONE BY COSTING PERSON (ONLY ONE SINGLE TOP PERSON)
     costing_done_counts = df[df['is_costing_done']].groupby('Assigned To').size().sort_values(ascending=False)
@@ -109,7 +79,6 @@ def generate_pdf():
         if len(top_candidates) == 1:
             top_costing_person_name = str(top_candidates[0])
         else:
-            # Tiebreaker: person with highest quote value handled
             cand_values = df[df['Assigned To'].isin(top_candidates)].groupby('Assigned To')['Offer Price Num'].sum()
             top_costing_person_name = str(cand_values.sort_values(ascending=False).index[0])
         top_costing_person_val = max_costing_done
@@ -152,10 +121,8 @@ def generate_pdf():
             "won_money": g_won_money
         })
 
-    # Sort summary data by Costings Done descending, then Assigned descending
     summary_data.sort(key=lambda x: (x['done'], x['assigned']), reverse=True)
 
-    # Summary Table HTML
     summary_html = ''
     total_sum_assigned = sum(s['assigned'] for s in summary_data)
     total_sum_done = sum(s['done'] for s in summary_data)
@@ -180,14 +147,14 @@ def generate_pdf():
         </tr>
         '''
 
-    # Add Total Row to Summary Table
+    pct_done_total = (total_sum_done / total_sum_assigned * 100) if total_sum_assigned > 0 else 0
     summary_html += f'''
     <tr style="background: #e2e8f0; font-weight: 800; border-top: 2px solid #64748b;">
         <td class="font-bold">TOTAL</td>
         <td class="text-center font-bold">{total_sum_assigned}</td>
         <td class="text-center font-bold" style="color: #166534;">{total_sum_done}</td>
         <td class="text-center font-bold" style="color: #b45309;">{total_sum_pending}</td>
-        <td class="text-center font-bold">{(total_sum_done/total_sum_assigned*100):.1f}%</td>
+        <td class="text-center font-bold">{pct_done_total:.1f}%</td>
         <td class="text-center font-bold" style="color: #16a34a;">{total_sum_won}</td>
         <td class="text-center font-bold" style="color: #b45309;">{total_sum_pending_leads}</td>
         <td class="text-right font-mono font-bold">{format_inr(total_sum_money)}</td>
@@ -210,8 +177,12 @@ def generate_pdf():
         row_class = 'even-row' if idx % 2 == 0 else 'odd-row'
         rows_html += f'<tr class="{row_class}"><td class="text-center font-bold">{lead_id}</td><td class="customer-name font-semibold">{customer}</td><td>{assigned}</td><td class="text-center nowrap">{enq_date}</td><td class="text-center">{curr_status}</td><td class="text-right nowrap font-mono font-semibold price-cell">{price}</td><td class="text-center">{cost_status}</td><td class="text-center">{result}</td><td class="text-center nowrap">{completion}</td></tr>\n'
 
-    min_date = df['Enquiry Date dt'].min().strftime('%d-%b-%Y')
-    max_date = df['Enquiry Date dt'].max().strftime('%d-%b-%Y')
+    if not df['Enquiry Date dt'].dropna().empty:
+        min_date = df['Enquiry Date dt'].min().strftime('%d-%b-%Y')
+        max_date = df['Enquiry Date dt'].max().strftime('%d-%b-%Y')
+        date_range_str = f"{min_date} to {max_date}" if min_date != max_date else min_date
+    else:
+        date_range_str = period_label
 
     html_content = f'''<!DOCTYPE html>
 <html lang="en">
@@ -287,7 +258,7 @@ def generate_pdf():
         <div class="report-subtitle">Comprehensive Costing Tracking & Status Report</div>
     </div>
     <div class="header-meta">
-        <div><strong>Date Range:</strong> {min_date} to {max_date}</div>
+        <div><strong>Period / Date Range:</strong> {date_range_str}</div>
         <div><strong>Total Enquiries:</strong> {total_leads} Records</div>
         <div><strong>Generated:</strong> 26-Aug-2026</div>
     </div>
@@ -297,18 +268,18 @@ def generate_pdf():
 <div class="kpi-grid">
     <div class="kpi-card highlight">
         <div class="kpi-title">Total Pipeline Value</div>
-        <div class="kpi-value">₹ {total_pipeline/10000000:.2f} Cr</div>
+        <div class="kpi-value">₹ {(total_pipeline/10000000):.2f} Cr</div>
         <div class="kpi-sub">{total_leads} Total Leads</div>
     </div>
     <div class="kpi-card won-card">
         <div class="kpi-title">Orders Won</div>
         <div class="kpi-value" style="color:#166534;">{won_count}</div>
-        <div class="kpi-sub">₹ {won_value/10000000:.2f} Cr Won</div>
+        <div class="kpi-sub">₹ {(won_value/10000000):.2f} Cr Won</div>
     </div>
     <div class="kpi-card">
         <div class="kpi-title">Quoted Offers</div>
         <div class="kpi-value" style="color:#1d4ed8;">{quoted_count}</div>
-        <div class="kpi-sub">₹ {quoted_value/10000000:.2f} Cr Quoted</div>
+        <div class="kpi-sub">₹ {(quoted_value/10000000):.2f} Cr Quoted</div>
     </div>
     <div class="kpi-card">
         <div class="kpi-title">Under Negotiation</div>
@@ -382,7 +353,7 @@ def generate_pdf():
 <div class="header-container">
     <div>
         <div class="company-title">ENEEPL &bull; COSTING TEAM REPORT</div>
-        <div class="report-subtitle">Raw Data Ledger</div>
+        <div class="report-subtitle">Raw Data Ledger ({period_label})</div>
     </div>
     <div class="header-meta">
         <div><strong>Generated:</strong> 26-Aug-2026</div>
@@ -411,46 +382,84 @@ def generate_pdf():
 </body>
 </html>
 '''
-    html_path = 'costing_report.html'
-    with open(html_path, 'w', encoding='utf-8') as f:
-        f.write(html_content)
+    return html_content
 
-    pdf_path = 'costing_report.pdf'
-    public_pdf_path = os.path.join('public', 'costing_report.pdf')
-    root_pdf_path = os.path.join('..', 'costing_report.pdf')
+def render_and_save(page, html_content, output_path):
+    dir_name = os.path.dirname(output_path)
+    if dir_name:
+        os.makedirs(dir_name, exist_ok=True)
+    page.set_content(html_content)
+    page.pdf(
+        path=output_path,
+        format='A4',
+        landscape=True,
+        print_background=True,
+        margin={'top': '8mm', 'bottom': '10mm', 'left': '6mm', 'right': '6mm'},
+        display_header_footer=True,
+        header_template='<div></div>',
+        footer_template='<div style="width: 100%; font-size: 6.5pt; color: #64748b; display: flex; justify-content: space-between; padding: 0 6mm; font-family: sans-serif;"><span>ENEEPL &bull; Costing Team Report</span><span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span></div>'
+    )
+    print(f"Rendered: {output_path}")
+
+def generate_all_pdfs():
+    csv_files = glob.glob('costing-report*.csv')
+    if not csv_files:
+        print("No CSV found.")
+        return
+    csv_path = max(csv_files, key=os.path.getctime)
+    df = pd.read_csv(csv_path)
+
+    df['ID_num'] = pd.to_numeric(df.iloc[:, 0], errors='coerce')
+    df = df.dropna(subset=['ID_num'])
+    df['ID'] = df['ID_num'].astype(int)
+
+    cust_str = df['Customer'].astype(str).str.strip().str.lower()
+    df = df[~cust_str.str.startswith('total ')]
+    df = df[~cust_str.isin(['total rows', 'total leads', 'total users', 'total statuses', 'total offer price', 'nan', '', '-'])]
+    df['Assigned To'] = df['Assigned To'].fillna('Unassigned').astype(str).str.strip()
+    df['Assigned To'] = df['Assigned To'].replace(r'^\s*$', 'Unassigned', regex=True)
+    df['Enquiry Date dt'] = pd.to_datetime(df['Enquiry Date'], errors='coerce')
+    df = df.sort_values(by=['Enquiry Date dt', 'ID'], ascending=[False, False])
+    df['Current Status Lower'] = df['Current Status'].astype(str).str.lower()
+    df['Offer Price Num'] = pd.to_numeric(df['Offer Price'], errors='coerce').fillna(0)
+    df['Costing Status Lower'] = df['Costing Status'].astype(str).str.lower().str.strip()
+    df['is_costing_done'] = ~df['Costing Status Lower'].isin(['pending', 'revision_in_progress', ''])
+    df['Month_Year'] = df['Enquiry Date dt'].dt.strftime('%B %Y')
 
     with sync_playwright() as p:
         browser = p.chromium.launch()
         page = browser.new_page()
-        page.goto('file:///' + os.path.abspath(html_path).replace('\\', '/'))
-        page.pdf(
-            path=pdf_path,
-            format='A4',
-            landscape=True,
-            print_background=True,
-            margin={'top': '8mm', 'bottom': '10mm', 'left': '6mm', 'right': '6mm'},
-            display_header_footer=True,
-            header_template='<div></div>',
-            footer_template='<div style="width: 100%; font-size: 6.5pt; color: #64748b; display: flex; justify-content: space-between; padding: 0 6mm; font-family: sans-serif;"><span>ENEEPL &bull; Costing Team Report</span><span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span></div>'
-        )
+
+        # 1. Master PDF (All Data)
+        html_master = generate_html_content(df, 'All Records')
+        render_and_save(page, html_master, 'costing_report.pdf')
+        shutil.copy2('costing_report.pdf', 'public/costing_report.pdf')
+        shutil.copy2('costing_report.pdf', '../costing_report.pdf')
+
+        # 2. Monthly PDFs
+        unique_months = df['Month_Year'].dropna().unique()
+        for m in unique_months:
+            df_month = df[df['Month_Year'] == m]
+            m_slug = m.lower().replace(' ', '_')
+            html_m = generate_html_content(df_month, m)
+            out_file = f'public/reports/costing_report_{m_slug}.pdf'
+            render_and_save(page, html_m, out_file)
+
+        # 3. Latest Week PDF
+        latest_date = df['Enquiry Date dt'].max()
+        day_diff = latest_date.weekday() + 1
+        if day_diff == 7: day_diff = 0
+        latest_sun = latest_date - pd.Timedelta(days=day_diff)
+        week_end = latest_sun + pd.Timedelta(days=7)
+        df_latest_week = df[(df['Enquiry Date dt'] >= latest_sun) & (df['Enquiry Date dt'] <= week_end)]
+        if df_latest_week.empty:
+            df_latest_week = df.head(10)
+        html_latest_week = generate_html_content(df_latest_week, 'Latest Week')
+        render_and_save(page, html_latest_week, 'public/reports/costing_report_latest_week.pdf')
+
         browser.close()
 
-    # Also copy to public/ folder and root
-    import shutil
-    try:
-        os.makedirs('public', exist_ok=True)
-        shutil.copy2(pdf_path, public_pdf_path)
-    except Exception as e:
-        print(f"Notice: public copy: {e}")
-
-    try:
-        shutil.copy2(pdf_path, root_pdf_path)
-    except Exception as e:
-        pass
-
-    print(f"Successfully generated clean report with {total_leads} leads!")
-    print(f"Top Costing Performer: {top_costing_person_name} ({top_costing_person_val} costings done)")
-    print(f"Saved PDF to {pdf_path} and {public_pdf_path}")
+    print("All Playwright PDF reports generated successfully!")
 
 if __name__ == '__main__':
-    generate_pdf()
+    generate_all_pdfs()
