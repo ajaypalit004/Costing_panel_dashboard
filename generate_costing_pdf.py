@@ -75,7 +75,9 @@ def generate_pdf():
         val_str = str(val).strip()
         label = val_str.replace('_', ' ').title()
         badge_class = 'cost-default'
-        if val_str.lower() == 'done': badge_class = 'cost-done'
+        if val_str.lower() == 'done':
+            label = 'First Offer Submitted'
+            badge_class = 'cost-done'
         elif val_str.lower() in ['revised_offer_submitted', 'submitted', 'accepted']: badge_class = 'cost-submitted'
         elif val_str.lower() == 'pending': badge_class = 'cost-pending'
         elif 'progress' in val_str.lower() or 'negotiat' in val_str.lower(): badge_class = 'cost-progress'
@@ -330,7 +332,7 @@ def generate_pdf():
     <div class="kpi-card-5 highlight-costing">
         <div class="kpi-title">HIGHEST COSTINGS COMPLETED</div>
         <div class="kpi-value" style="color: #166534;">{top_costing_person_name}</div>
-        <div class="kpi-sub"><span class="cost-badge cost-done">{top_costing_person_val} Costings Done</span></div>
+        <div class="kpi-sub"><span class="cost-badge cost-done">{top_costing_person_val} Costings Completed</span></div>
     </div>
     <div class="kpi-card-5 highlight">
         <div class="kpi-title">HIGHEST WINS (LEADS)</div>
@@ -361,7 +363,7 @@ def generate_pdf():
         <tr>
             <th>Costing Person</th>
             <th class="text-center">Total Assigned</th>
-            <th class="text-center">Costings Done</th>
+            <th class="text-center">Costings Completed</th>
             <th class="text-center">Costings Pending</th>
             <th class="text-center">Completion %</th>
             <th class="text-center">Orders Won</th>
