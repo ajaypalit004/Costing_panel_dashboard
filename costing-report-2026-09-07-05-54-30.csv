@@ -1,8 +1,8 @@
 ID,Customer,"Assigned To","Enquiry Date","Current Status","Offer Price","Costing Status","costing accepted or rejected","Costing accepted date","Costing completion date"
 13,"  J K CEMENT ",Rakesh,2026-04-30,under_negotiation,3030600.00,done,Accepted,2026-05-02,2026-05-04
 14,Microtek,Rakesh,2026-04-30,won,43859000.00,done,Accepted,2026-05-04,2026-05-12
-15,"Maisons-Super ","Anil Yadav",2026-05-02,quoted,985000.00,revised_offer_submitted,Accepted,2026-05-06,2026-05-05
-16,"SEFRICODE ","Anil Yadav",2026-04-24,quoted,8599000.00,revised_offer_submitted,Accepted,2026-05-06,2026-05-05
+15,"Maisons-Super ","Anil Yadav",2026-05-02,lost,985000.00,revised_offer_submitted,Accepted,2026-05-06,2026-05-05
+16,"SEFRICODE ","Anil Yadav",2026-04-24,lost,8599000.00,revised_offer_submitted,Accepted,2026-05-06,2026-05-05
 17,"Babu Lal Kumawat ","Anil Yadav",2026-04-20,won,198000.00,revised_offer_submitted,Accepted,2026-05-06,2026-05-02
 18,"Manipal University ","Anil Yadav",2026-03-21,won,6032420.00,revised_offer_submitted,Accepted,2026-05-06,2026-04-18
 19,"  J K CEMENT ",Rakesh,2026-05-06,lost,,pending,Accepted,2026-05-13,
@@ -31,7 +31,7 @@ ID,Customer,"Assigned To","Enquiry Date","Current Status","Offer Price","Costing
 52,"PURE CEMENT ","Aayushi ",2026-05-06,pending,76068123.00,revised_offer_submitted,Accepted,2026-06-15,2026-06-10
 54,"PURE CEMENT ","Aayushi ",2026-05-01,technical_qualification_passed,,pending,Accepted,2026-06-15,
 55,"Reliance ","Anil Yadav",2026-05-11,lost,404100.00,revised_offer_submitted,Accepted,2026-05-13,2026-05-12
-56,"Maisons-Super ","Anil Yadav",2026-05-12,quoted,736004.00,done,Accepted,2026-05-13,2026-05-13
+56,"Maisons-Super ","Anil Yadav",2026-05-12,lost,736004.00,done,Accepted,2026-05-13,2026-05-13
 57,"MAP Engineers & Consultants Pvt. Ltd.","Deepak Janyani",2026-05-11,quoted,3597762.00,done,Accepted,2026-05-13,2026-05-13
 61,"Global Aircon","Aashu ",2026-05-13,pending,3866300.00,done,Accepted,2026-05-13,2026-05-20
 64,RHETRONIC,Akhilesh,2026-05-13,pending,5788917.00,revision_in_progress,Accepted,2026-05-15,2026-05-16
@@ -39,13 +39,13 @@ ID,Customer,"Assigned To","Enquiry Date","Current Status","Offer Price","Costing
 72,"Prasheetan Aircon",Akhilesh,2026-05-12,pending,230000.00,revised_offer_submitted,Accepted,2026-05-15,2026-05-15
 73,"Garg Residence, Jaipur","Deepak Janyani",2026-05-16,quoted,1254700.00,done,Accepted,2026-05-19,2026-05-21
 74,"Maisons-Super ","Anil Yadav",2026-05-18,won,859320.00,done,Accepted,2026-05-20,2026-05-22
-81,"Shree Cement Ltd | Gurugram","Aashu ",2026-05-18,pending,1111800.00,done,Accepted,2026-05-20,2026-05-23
+81,"Shree Cement Ltd | Gurugram","Aashu ",2026-05-18,won,1111800.00,done,Accepted,2026-05-20,2026-05-23
 83,"Ultratech cement, reddipalayam, TN","Aashu ",2026-05-19,quoted,708700.00,revised_offer_submitted,Accepted,2026-05-25,2026-05-26
 84,"Modren Construction ","Anil Yadav",2026-05-19,quoted,5378400.00,done,Accepted,2026-05-20,2026-05-21
 87,"KSP Hydro Engineer Pvt. Ltd.","Deepak Janyani",2026-05-19,quoted,850915.00,done,Accepted,2026-05-21,2026-05-30
 88,"Ultratech cement, birla white",Bharat,2026-05-15,quoted,7020200.00,done,Accepted,2026-05-25,2026-05-26
 89,"Manipal Academy of Higher Education ","Anil Yadav",2026-05-19,won,877413.00,negotiating_with_vendor,Accepted,2026-05-21,2026-05-21
-90,"Tenco system ",Rakesh,2026-05-20,pending,32379600.00,done,Accepted,2026-05-25,2026-05-28
+90,"Tenco system ",Rakesh,2026-05-20,lost,32379600.00,done,Accepted,2026-05-25,2026-05-28
 92,"GA INFRA","Amit Gautam",2026-05-22,quoted,7700000.00,done,Accepted,2026-05-23,
 93,"Tenco system ",Rakesh,2026-05-23,pending,7519616.20,done,Accepted,2026-05-25,2026-05-28
 94,"Dynamic cables limited","Deepak Janyani",2026-05-23,lost,8986203.00,revised_offer_submitted,Accepted,2026-05-25,2026-07-02
@@ -78,20 +78,21 @@ ID,Customer,"Assigned To","Enquiry Date","Current Status","Offer Price","Costing
 132,"Ultratech cement, birla white",Rakesh,2026-06-09,quoted,470300.00,done,Accepted,2026-06-11,2026-06-23
 133,"Stonex ",Akhilesh,2026-06-06,pending,23536039.00,done,Accepted,2026-06-22,2026-06-20
 134,"Gautam solar power Pvt. Ltd.",Rakesh,2026-06-10,pending,173014268.00,done,Accepted,2026-06-11,2026-07-08
-135,"Shree Cement Ltd., Pedagralapadu, Dachepalli (M), Palnadu (D)","Aayushi ",2026-06-10,pending,,done,Accepted,2026-06-15,
+135,"Shree Cement Ltd., Pedagralapadu, Dachepalli (M), Palnadu (D)","Aayushi ",2026-06-10,technical_qualification_passed,,done,Accepted,2026-06-15,
 138,"NVCL, Ahemdabad",Rakesh,2026-06-11,pending,441195.00,done,Accepted,2026-06-15,2026-07-06
-141,"studio LINEDESIGN","Deepak Janyani",2026-06-16,quoted,52231700.00,done,Accepted,2026-06-22,
-142,"EPE Process Filters & Accumulators Pvt. Ltd.","Deepak Janyani",2026-06-16,quoted,25007000.00,done,Accepted,2026-06-20,2026-06-20
+141,"studio LINEDESIGN","Deepak Janyani",2026-06-16,lost,52231700.00,done,Accepted,2026-06-22,
+142,"EPE Process Filters & Accumulators Pvt. Ltd.","Deepak Janyani",2026-06-16,under_negotiation,25007000.00,done,Accepted,2026-06-20,2026-06-20
 143,"KAILASH SONI","Deepak Janyani",2026-06-15,quoted,208850.00,done,Accepted,2026-06-25,
-145,"PURE CEMENT ","Aayushi ",2026-06-03,pending,24888535.00,done,Accepted,2026-06-17,2026-06-10
-146,"Essar Constructions India Limited","Aayushi ",2026-06-17,pending,,pending,Accepted,2026-06-17,
+145,"PURE CEMENT ","Aayushi ",2026-06-03,under_negotiation,24888535.00,done,Accepted,2026-06-17,2026-06-10
+146,"Essar Constructions India Limited","Aayushi ",2026-06-17,lost,,pending,Accepted,2026-06-17,
 147,"JK Cement Saifco Private Limited","Aayushi ",2026-06-17,won,328922.00,revised_offer_submitted,Accepted,2026-06-17,2026-06-02
-148,"ARASMETA CEMENT PLANT,","Aayushi ",2026-06-16,pending,709900.00,done,Accepted,2026-06-17,2026-06-17
+148,"ARASMETA CEMENT PLANT,","Aayushi ",2026-06-16,lost,709900.00,done,Accepted,2026-06-17,2026-06-17
 149,"Hindus than National Glass & Industries Ltd.","Aayushi ",2026-06-17,pending,144071.00,revised_offer_submitted,Accepted,2026-06-17,2026-06-22
 150,"PURE CEMENT ","Aayushi ",2026-06-16,pending,76920750.00,revised_offer_submitted,Accepted,2026-06-17,2026-06-10
 151,"JK Cement Saifco Private Limited","Aayushi ",2026-06-16,won,9400000.00,revised_offer_submitted,Accepted,2026-06-17,2026-06-17
 152,"AIRIFFIC GROUP","Aashu ",2026-06-16,pending,36714275.00,in_progress,Accepted,2026-07-22,2026-06-20
 153,"Ideal Datacom (P) Ltd","Deepak Janyani",2026-06-19,quoted,741000.00,done,Accepted,2026-06-25,2026-06-25
+155,"GLC CHANDIGARH","Aayushi ",2026-06-20,pending,3500000.00,done,Accepted,2026-08-27,2026-06-23
 156,"Maisons-Super ","Anil Yadav",2026-06-19,quoted,365647.00,done,Accepted,2026-06-23,2026-06-20
 157,"GLOBAL BUILDESTATE PROJECTS PVT LTD","RamKrishna Pandey",2026-06-23,pending,10874675.00,done,Accepted,2026-06-27,2026-06-27
 159,"  J K CEMENT ",vikram,2026-06-23,under_negotiation,10000.00,negotiating_with_vendor,Accepted,2026-06-23,2026-06-23
@@ -99,7 +100,7 @@ ID,Customer,"Assigned To","Enquiry Date","Current Status","Offer Price","Costing
 163,"Lahoty Buildcon",Akhilesh,2026-06-20,quoted,2150000.00,done,Accepted,2026-06-26,2026-06-26
 165,"RK ENTERPRISES","Amit Gautam",2026-06-18,won,800000.00,pending,Accepted,2026-06-26,
 166,"Stonex ",Akhilesh,2026-06-06,pending,23724847.00,revised_offer_submitted,Accepted,2026-06-27,2026-06-29
-170,"TECHNICAL CONSULTANT","Aditya Soni",2026-06-24,quoted,3580807.00,done,Accepted,2026-06-27,2026-06-26
+170,"TECHNICAL CONSULTANT","Aditya Soni",2026-06-24,lost,3580807.00,done,Accepted,2026-06-27,2026-06-26
 171,"Shree Cement Ltd | Gurugram",Rakesh,2026-06-29,pending,51021989.00,done,Accepted,2026-07-01,2026-07-10
 172,"  J K CEMENT ","Aashu ",2026-06-27,pending,0.00,pending,Accepted,2026-07-03,
 173,"Shree Cement Ltd | Gurugram",Rakesh,2026-06-30,lost,4300000.00,done,Accepted,2026-07-06,2026-07-06
@@ -110,28 +111,29 @@ ID,Customer,"Assigned To","Enquiry Date","Current Status","Offer Price","Costing
 182,"RJ PACKAGING","Pavan Kumar",2026-07-02,pending,16336400.00,done,Accepted,2026-07-11,2026-07-11
 183,"HYPER GREEN ENERGY ","Aditya Soni",2026-07-05,lost,354079.00,done,Accepted,2026-07-08,2026-07-06
 184,"SRB POWER INDIA PRIVATE LIMITED","Aditya Soni",2026-07-08,lost,1237414.00,done,Accepted,2026-07-08,2026-07-08
-185,"JK Cement Saifco Private Limited","Aayushi ",2026-07-06,won,328000.00,pending,Accepted,2026-07-08,2026-06-30
-186,"JK Cement Saifco Private Limited","Aayushi ",2026-07-07,pending,,pending,Accepted,2026-07-08,
-187,"JK Cement Saifco Private Limited","Aayushi ",2026-07-07,pending,,pending,Accepted,2026-07-08,
+185,"JK Cement Saifco Private Limited","Aayushi ",2026-07-06,won,328000.00,done,Accepted,2026-07-08,2026-06-30
+186,"JK Cement Saifco Private Limited","Aayushi ",2026-07-07,pending,26600000.00,done,Accepted,2026-07-08,2026-08-14
+187,"JK Cement Saifco Private Limited","Aayushi ",2026-07-07,pending,18300000.00,done,Accepted,2026-07-08,2026-08-14
 188,"Pansen Engineering ",Rakesh,2026-07-07,pending,,pending,Accepted,2026-07-08,
 189,"CHEER SAGAR","Anil Yadav",2026-07-07,quoted,1034000.00,revised_offer_submitted,Accepted,2026-07-09,2026-07-09
 190,"RISHABH INTERIOR",Akhilesh,2026-07-02,pending,301000.00,done,Accepted,2026-07-10,2026-07-10
 191,"HEI POWER SYSTEM PVT. LTD.",Akhilesh,2026-07-01,quoted,5205720.00,done,Accepted,2026-07-10,2026-07-10
 192,"COLLIERS INTERNATIONAL(INDIA) PROPERTY SERVICES PVT. LTD.","Anil Yadav",2026-07-07,quoted,5805317.00,revised_offer_submitted,Accepted,2026-07-10,2026-07-10
 194,"Real Eco paper pvt Ltd","Deepak Janyani",2026-07-15,won,4391542.00,revised_offer_submitted,Accepted,2026-07-16,2026-08-05
-196,Gravita,"Aditya Soni",2026-07-17,quoted,,pending,Accepted,2026-07-18,
+195,"NVCL, Ahemdabad","Aayushi ",2026-07-17,lost,,pending,Accepted,2026-09-03,
+196,Gravita,"Aditya Soni",2026-07-17,quoted,16569201.00,negotiating_with_vendor,Accepted,2026-07-18,
 198,"KAHAN ELECTRICAL",Akhilesh,2026-07-16,pending,14145800.00,revised_offer_submitted,Accepted,2026-08-25,2026-07-21
 199,"KAHAN ELECTRICAL",Akhilesh,2026-07-17,pending,37719100.00,revised_offer_submitted,Accepted,2026-07-24,2026-07-20
 201,"A one Builders ","Anil Yadav",2026-07-20,quoted,636277.00,done,Accepted,2026-07-21,2026-07-21
 202,"Mundra Ramming Mass Private Limited","Aditya Soni",2026-07-14,quoted,2553291.00,done,Accepted,2026-07-22,2026-07-16
 203,"MAHESHWARI DISTRIBUTOR",Rakesh,2026-07-15,pending,25595600.00,done,Accepted,2026-07-22,2026-07-22
 204,"STYERENIX LTD.",Rakesh,2026-07-08,quoted,12412900.00,done,Accepted,2026-07-22,2026-07-22
-205,"INA Solar, Narmadapuram, Cell plant","Deepak Janyani",2026-06-29,quoted,,pending,Accepted,2026-07-23,
+205,"INA Solar, Narmadapuram, Cell plant","Deepak Janyani",2026-06-29,won,166396710.00,revision_in_progress,Accepted,2026-07-23,2026-08-25
 206,"Ethan Power private Ltd.",Rakesh,2026-07-15,pending,4745259.00,done,Accepted,2026-07-23,2026-07-28
 207,"UTCL, Awarpur cement works ",Rakesh,2026-07-22,pending,4209600.00,done,Accepted,2026-07-24,2026-07-27
 208,"A one Builders ","Anil Yadav",2026-07-23,won,450000.00,done,Accepted,2026-07-23,2026-07-23
-209,"Hindustan Copper Limited","Deepak Janyani",2026-07-23,pending,,pending,Accepted,2026-07-23,
-210,"Westin hotel Jaipur","Aditya Soni",2026-07-23,pending,,pending,Accepted,2026-08-10,
+209,"Hindustan Copper Limited","Deepak Janyani",2026-07-23,pending,,first_offer_submitted,Accepted,2026-07-23,
+210,"Westin hotel Jaipur","Aditya Soni",2026-07-23,under_negotiation,,revision_in_progress,Accepted,2026-08-10,
 212,"TIRUPATI ELECTRICALS","Pavan Kumar",2026-07-08,pending,1892700.00,done,Accepted,2026-08-01,2026-08-01
 214,"MAISONS - SUPER ","Anil Yadav",2026-07-17,lost,149375.00,done,Accepted,2026-07-30,2026-07-30
 215,"MAP Engineers & Consultants Pvt. Ltd.",Rakesh,2026-08-03,pending,2376300.00,done,Accepted,2026-08-03,2026-08-18
@@ -139,15 +141,28 @@ ID,Customer,"Assigned To","Enquiry Date","Current Status","Offer Price","Costing
 217,"Maheshwari distributor ",Rakesh,2026-08-03,pending,52142000.00,done,Accepted,2026-08-05,2026-08-10
 218,"TAPRI ","Aditya Soni",2026-08-07,won,103237.00,done,Accepted,2026-08-10,2026-08-07
 219,"SEFRICODE ","Anil Yadav",2026-07-29,won,1951610.00,revised_offer_submitted,Accepted,2026-08-11,2026-08-10
-220,"HYCONE PROJECTS","Deepak Janyani",2026-08-01,won,,pending,Accepted,2026-08-11,
+220,"HYCONE PROJECTS","Deepak Janyani",2026-08-01,won,4391542.00,revised_offer_submitted,Accepted,2026-08-11,
 221,"Shree Cement Ltd | Gurugram",Rakesh,2026-08-17,pending,19104630.00,done,Accepted,2026-08-17,2026-08-19
 222," Dalmia Kadappa-2, Telengana",Rakesh,2026-08-21,pending,,pending,Accepted,2026-08-24,
 223,"LORI KEETAMENITIES (PARUL HOTEL)","Anil Yadav",2026-07-24,won,1240000.00,revised_offer_submitted,Accepted,2026-08-22,2026-08-31
 224,"A one Builders ","Anil Yadav",2026-08-13,quoted,7966801.00,done,Accepted,2026-08-24,2026-08-24
 225,"A one Builders ","Anil Yadav",2026-08-13,quoted,2472700.00,done,Accepted,2026-08-24,2026-08-17
 227,"A one Builders ","Anil Yadav",2026-08-19,quoted,3673196.00,done,Accepted,2026-08-25,2026-08-25
-228,GHADI,"Deepak Janyani",2026-08-25,pending,,pending,Accepted,2026-08-25,
-229,"SGB Infra","Aashu ",2026-08-18,won,900000.00,pending,Accepted,2026-08-25,2026-08-24
+228,GHADI,"Deepak Janyani",2026-08-25,quoted,4766056.00,first_offer_submitted,Accepted,2026-08-25,
+229,"SGB Infra","Aashu ",2026-08-18,won,900001.00,first_offer_submitted,Accepted,2026-08-25,2026-08-24
 230,"KS Engineering",Akhilesh,2026-08-24,won,1398182.00,revised_offer_submitted,Accepted,2026-08-25,2026-08-19
 231,"GA INFRA",Akhilesh,2026-08-20,won,6802729.00,revised_offer_submitted,Accepted,2026-08-25,2026-08-21
-232,"Prasheetan Aircon","Aashu ",2026-08-12,won,2351000.00,pending,Accepted,2026-08-25,2026-08-15
+232,"Prasheetan Aircon","Aashu ",2026-08-12,won,2351000.00,first_offer_submitted,Accepted,2026-08-25,2026-08-15
+233,"SEFRICODE ","Anil Yadav",2026-08-25,pending,,technical_query,Accepted,2026-09-05,
+234,"GENESIS INTERNATIONAL","Aashu ",2026-08-26,pending,,pending,Accepted,2026-08-26,
+235,"Shree Cement Ltd | Gurugram",Rakesh,2026-08-26,pending,5328482.00,first_offer_submitted,Accepted,2026-08-31,2026-09-04
+236,"safico Jk cement ","Aayushi ",2026-08-31,pending,,pending,Accepted,2026-09-03,
+237,"  J K CEMENT ","Aayushi ",2026-08-30,pending,,pending,Accepted,2026-09-03,
+238,"Shree Cement Ltd","Aayushi ",2026-08-31,pending,,pending,Accepted,2026-09-03,
+239,"GEBR. PFEIFFER (INDIA) PVT. LTD.","Aayushi ",2026-08-30,pending,,pending,Accepted,2026-09-03,
+240,"Danfoss Industries Pvt. Ltd.","Aayushi ",2026-09-01,pending,,pending,Accepted,2026-09-05,
+241,"PURE CEMENT ",Rakesh,2026-09-01,pending,,pending,Accepted,2026-09-04,
+243,"Hindustan Zinc Ltd.","Aashu ",2026-09-04,pending,,pending,Accepted,2026-09-04,
+245,"JAI BHAWANI ENTERPRISES","RamKrishna Pandey",2026-09-01,pending,13327100.00,first_offer_submitted,Accepted,2026-09-05,2026-09-05
+249,"DBCL, Bhopal ","Deepak Janyani",2026-08-08,quoted,18648590.00,first_offer_submitted,Accepted,2026-09-05,2026-09-03
+251,"DESIRE ENERGY","Deepak Janyani",2026-07-22,under_negotiation,792000.00,negotiating_with_vendor,Accepted,2026-09-05,2026-09-05

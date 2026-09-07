@@ -55,7 +55,7 @@ export function openExactHtmlPrintReport(leads, filterInfo = {}) {
     const s = String(val).trim().toLowerCase();
     let label = s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     let badgeClass = 'cost-default';
-    if (s === 'done') {
+    if (s === 'done' || s === 'first_offer_submitted') {
       label = 'First Offer Submitted';
       badgeClass = 'cost-done';
     } else if (['revised_offer_submitted', 'submitted', 'accepted'].includes(s)) {

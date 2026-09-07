@@ -37,19 +37,31 @@ function getSundayWeek(dateObj) {
 }
 
 const CANDIDATE_FILES = [
+  'costing-report-2026-09-07-05-54-30.csv',
   'costing-report-2026-08-26-09-53-12.csv',
   'nn.xlsx',
   'leads-report-20260709-104204.xlsx'
 ];
 
 function getLatestDataFile() {
+  const dir = process.cwd();
+  try {
+    const files = fs.readdirSync(dir);
+    const costingFiles = files.filter(f => f.startsWith('costing-report') && f.endsWith('.csv')).sort().reverse();
+    if (costingFiles.length > 0) {
+      return path.join(dir, costingFiles[0]);
+    }
+  } catch (e) {
+    console.error('Error scanning directory for costing CSV:', e);
+  }
+
   for (const filename of CANDIDATE_FILES) {
-    const fullPath = path.join(process.cwd(), filename);
+    const fullPath = path.join(dir, filename);
     if (fs.existsSync(fullPath)) {
       return fullPath;
     }
   }
-  return path.join(process.cwd(), CANDIDATE_FILES[0]);
+  return path.join(dir, CANDIDATE_FILES[0]);
 }
 
 export async function GET() {

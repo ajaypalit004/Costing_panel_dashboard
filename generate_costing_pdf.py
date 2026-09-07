@@ -49,8 +49,7 @@ def format_costing_status(val):
     if pd.isna(val): return '-'
     val_str = str(val).strip()
     label = val_str.replace('_', ' ').title()
-    badge_class = 'cost-default'
-    if val_str.lower() == 'done':
+    if val_str.lower() in ['done', 'first_offer_submitted']:
         label = 'First Offer Submitted'
         badge_class = 'cost-done'
     elif val_str.lower() in ['revised_offer_submitted', 'submitted', 'accepted']: badge_class = 'cost-submitted'
