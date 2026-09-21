@@ -58,7 +58,7 @@ export function openExactHtmlPrintReport(leads, filterInfo = {}) {
     if (s === 'done' || s === 'first_offer_submitted') {
       label = 'First Offer Submitted';
       badgeClass = 'cost-done';
-    } else if (['revised_offer_submitted', 'submitted', 'accepted'].includes(s)) {
+    } else if (['revised_offer_submitted', 'submitted', 'accepted', 'technical_offer_submitted'].includes(s) || s.includes('submitted')) {
       badgeClass = 'cost-submitted';
     } else if (s === 'pending') {
       badgeClass = 'cost-pending';

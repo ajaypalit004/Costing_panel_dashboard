@@ -37,6 +37,7 @@ function getSundayWeek(dateObj) {
 }
 
 const CANDIDATE_FILES = [
+  'costing-report-2026-09-21-05-42-31.csv',
   'costing-report-2026-09-12-04-43-39.csv',
   'costing-report-2026-09-07-05-54-30.csv',
   'costing-report-2026-08-26-09-53-12.csv',
