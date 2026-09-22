@@ -45,7 +45,7 @@ def format_status(val):
     elif 'tech' in status_lower: badge_class = 'badge-tech'
     return f'<span class="badge {badge_class}">{html.escape(label)}</span>'
 
-def format_costing_status(val):
+def format_costing_status(val, enq_dt=None):
     if pd.isna(val): return '-'
     val_str = str(val).strip()
     label = val_str.replace('_', ' ').title()
@@ -54,8 +54,26 @@ def format_costing_status(val):
         label = 'First Offer Submitted'
         badge_class = 'cost-done'
     elif any(x in val_str.lower() for x in ['submitted', 'accepted']): badge_class = 'cost-submitted'
-    elif val_str.lower() == 'pending': badge_class = 'cost-pending'
-    elif 'progress' in val_str.lower() or 'negotiat' in val_str.lower(): badge_class = 'cost-progress'
+    elif val_str.lower() == 'pending':
+        badge_class = 'cost-pending'
+        if enq_dt is not None and pd.notna(enq_dt):
+            days = max(0, (pd.Timestamp.now() - pd.to_datetime(enq_dt)).days)
+            weeks = days // 7
+            if weeks >= 1:
+                label = f"Pending ({weeks} wks)"
+            elif days > 0:
+                label = f"Pending ({days}d)"
+            else:
+                label = "Pending"
+    elif 'progress' in val_str.lower() or 'negotiat' in val_str.lower():
+        badge_class = 'cost-progress'
+        if enq_dt is not None and pd.notna(enq_dt) and 'progress' in val_str.lower():
+            days = max(0, (pd.Timestamp.now() - pd.to_datetime(enq_dt)).days)
+            weeks = days // 7
+            if weeks >= 1:
+                label = f"{label} ({weeks} wks)"
+            elif days > 0:
+                label = f"{label} ({days}d)"
     elif 'query' in val_str.lower() or 'rejected' in val_str.lower(): badge_class = 'cost-query'
     return f'<span class="cost-badge {badge_class}">{html.escape(label)}</span>'
 
@@ -170,7 +188,7 @@ def generate_html_content(df, period_label):
         enq_date = html.escape(str(r['Enquiry Date']) if pd.notna(r['Enquiry Date']) else '-')
         curr_status = format_status(r['Current Status'])
         price = format_inr(r['Offer Price'])
-        cost_status = format_costing_status(r['Costing Status'])
+        cost_status = format_costing_status(r['Costing Status'], r['Enquiry Date dt'])
         result = format_costing_status(r['costing accepted or rejected'])
         completion = html.escape(str(r['Costing completion date']) if pd.notna(r['Costing completion date']) else '-')
         
@@ -451,10 +469,12 @@ def generate_all_pdfs():
         if day_diff == 7: day_diff = 0
         latest_sun = latest_date - pd.Timedelta(days=day_diff)
         week_end = latest_sun + pd.Timedelta(days=7)
-        df_latest_week = df[(df['Enquiry Date dt'] >= latest_sun) & (df['Enquiry Date dt'] <= week_end)]
+        # 3. Latest Week PDF (Work in latest week + ALL open pending costings till date)
+        is_in_week = (df['Enquiry Date dt'] >= latest_sun) & (df['Enquiry Date dt'] <= week_end)
+        df_latest_week = df[is_in_week | (~df['is_costing_done'])].copy()
         if df_latest_week.empty:
             df_latest_week = df.head(10)
-        html_latest_week = generate_html_content(df_latest_week, 'Latest Week')
+        html_latest_week = generate_html_content(df_latest_week, 'Latest Week (+ All Open Pending)')
         render_and_save(page, html_latest_week, 'public/reports/costing_report_latest_week.pdf')
 
         browser.close()

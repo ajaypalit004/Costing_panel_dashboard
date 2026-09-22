@@ -93,14 +93,22 @@ export default function Dashboard() {
     const latestWeekKey = weeks.length > 0 ? weeks[0].key : null;
 
     return leads.filter(l => {
+      const isPending = l.costingStatus === 'pending' || l.costingStatus === 'revision_in_progress' || !l.costingStatus;
+
       let matchWeek = true;
+      let matchMonth = true;
       if (selectedWeek === 'LATEST') {
-        matchWeek = l.weekKey === latestWeekKey;
+        // RULE: For selected week, retain ALL pending costings till date regardless of week
+        matchWeek = isPending || (l.weekKey === latestWeekKey);
+        matchMonth = selectedMonth === 'All' || isPending || (l.monthYear === selectedMonth);
       } else if (selectedWeek !== 'All') {
-        matchWeek = l.weekKey === selectedWeek;
+        // RULE: For any specific week, retain ALL pending costings till date regardless of week
+        matchWeek = isPending || (l.weekKey === selectedWeek);
+        matchMonth = selectedMonth === 'All' || isPending || (l.monthYear === selectedMonth);
+      } else {
+        matchMonth = selectedMonth === 'All' || l.monthYear === selectedMonth;
       }
 
-      const matchMonth = selectedMonth === 'All' || l.monthYear === selectedMonth;
       const matchEng = selectedEngineer === 'All' || l.engineer === selectedEngineer;
       const matchSales = selectedSalesPerson === 'All' || l.salesPerson === selectedSalesPerson;
       return matchWeek && matchMonth && matchEng && matchSales;
@@ -170,7 +178,13 @@ export default function Dashboard() {
 
     const formattedClientSummary = filteredLeads
       .map(c => ({ ...c, displayValue: formatMoney(c.offerPrice) }))
-      .sort((a, b) => b.daysOpen - a.daysOpen);
+      .sort((a, b) => {
+        const isPendingA = a.costingStatus === 'pending' || a.costingStatus === 'revision_in_progress' || !a.costingStatus;
+        const isPendingB = b.costingStatus === 'pending' || b.costingStatus === 'revision_in_progress' || !b.costingStatus;
+        if (isPendingA && !isPendingB) return -1;
+        if (!isPendingA && isPendingB) return 1;
+        return (b.daysOpen || 0) - (a.daysOpen || 0);
+      });
 
     const ageingArray = [
       { range: '0–2 Days', count: ageingCounts['0-2 Days'] },
@@ -242,6 +256,45 @@ export default function Dashboard() {
       salesPerson: selectedSalesPerson,
       weekLabel: selectedWeek !== 'All' ? (weeks.find(w => w.key === selectedWeek)?.label || selectedWeek) : ''
     });
+  };
+
+  const getPendingDurationInfo = (lead) => {
+    const isPending = lead.costingStatus === 'pending' || lead.costingStatus === 'revision_in_progress' || !lead.costingStatus;
+    if (!isPending) return null;
+
+    const days = lead.daysOpen !== undefined ? lead.daysOpen : 0;
+    const weeks = Math.floor(days / 7);
+
+    let durationLabel = '';
+    let severityClass = '';
+
+    if (days <= 0) {
+      durationLabel = 'Today';
+      severityClass = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+    } else if (days < 7) {
+      durationLabel = `${days}d`;
+      severityClass = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+    } else {
+      const wkText = weeks === 1 ? '1 wk' : `${weeks} wks`;
+      const rem = days % 7;
+      const remText = rem > 0 ? ` ${rem}d` : '';
+      durationLabel = `${wkText}${remText}`;
+      if (weeks < 2) {
+        severityClass = 'bg-amber-500/25 text-amber-300 border-amber-500/50';
+      } else if (weeks < 4) {
+        severityClass = 'bg-orange-500/30 text-orange-300 border-orange-500/60 font-semibold';
+      } else {
+        severityClass = 'bg-rose-500/35 text-rose-200 border-rose-500/70 font-bold';
+      }
+    }
+
+    return {
+      days,
+      weeks,
+      label: durationLabel,
+      fullText: weeks > 0 ? `${weeks} ${weeks === 1 ? 'week' : 'weeks'} (${days} days)` : `${days} days`,
+      severityClass
+    };
   };
 
   if (loading) {
@@ -394,7 +447,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-center mb-2 pb-1.5 border-b border-slate-700/50 shrink-0">
             <h3 className="text-xs font-bold text-white uppercase tracking-wider">Costing Person Status</h3>
             <span className="text-[10px] font-mono text-slate-400 bg-slate-800/90 px-2 py-0.5 rounded-full">
-              {engineerPerformance.length} Persons
+              {selectedWeek !== 'All' ? 'Wk Comp + All Pend' : `${engineerPerformance.length} Persons`}
             </span>
           </div>
           
@@ -404,8 +457,8 @@ export default function Dashboard() {
                 <tr>
                   <th className="px-2.5 py-1.5 bg-slate-900 font-bold">Costing Person</th>
                   <th className="px-1.5 py-1.5 bg-slate-900 font-bold text-center">Assigned</th>
-                  <th className="px-1.5 py-1.5 bg-slate-900 font-bold text-center">Comp</th>
-                  <th className="px-1.5 py-1.5 bg-slate-900 font-bold text-center">Pend</th>
+                  <th className="px-1.5 py-1.5 bg-slate-900 font-bold text-center">{selectedWeek !== 'All' ? 'Wk Comp' : 'Comp'}</th>
+                  <th className="px-1.5 py-1.5 bg-slate-900 font-bold text-center" title="All open pending costings till date">{selectedWeek !== 'All' ? 'All Pend' : 'Pend'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
@@ -478,7 +531,14 @@ export default function Dashboard() {
           {/* Bottom Half: Client Summary (Live Tracking) Table */}
           <div className="glass-card flex flex-col p-2.5 h-[52%] min-h-0">
             <div className="flex justify-between items-center mb-1.5 pb-1 border-b border-slate-700/50 shrink-0">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">Client Summary (Live Tracking)</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xs font-bold text-white uppercase tracking-wider">Client Summary (Live Tracking)</h3>
+                {selectedWeek !== 'All' && (
+                  <span className="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded font-medium">
+                    Week Output + All Open Pending
+                  </span>
+                )}
+              </div>
               <span className="text-[10px] font-mono text-slate-400 bg-slate-800/90 px-2 py-0.5 rounded-full">
                 {clientSummary.length} Leads
               </span>
@@ -488,28 +548,48 @@ export default function Dashboard() {
               <table className="w-full text-left text-xs text-slate-300">
                 <thead className="text-[10px] uppercase bg-slate-900 text-slate-400 sticky top-0 z-10 border-b border-slate-700/80 shadow-sm">
                   <tr>
-                    <th className="px-2.5 py-1.5 bg-slate-900 font-bold">Client</th>
+                    <th className="px-2.5 py-1.5 bg-slate-900 font-bold">Client & ID</th>
                     <th className="px-2 py-1.5 bg-slate-900 font-bold">Value</th>
                     <th className="px-2 py-1.5 bg-slate-900 font-bold">Costing Eng</th>
                     <th className="px-2 py-1.5 bg-slate-900 font-bold">Lead Person</th>
-                    <th className="px-2 py-1.5 bg-slate-900 font-bold">Status</th>
+                    <th className="px-2 py-1.5 bg-slate-900 font-bold">Costing Status / Ageing</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
                   {clientSummary.map((client) => {
-                    const isPending = client.costingStatus === 'pending' || client.costingStatus === 'revision_in_progress';
+                    const isPending = client.costingStatus === 'pending' || client.costingStatus === 'revision_in_progress' || !client.costingStatus;
+                    const durationInfo = getPendingDurationInfo(client);
+                    const isCritical = isPending && durationInfo?.weeks >= 4;
                     return (
-                      <tr key={client.id} className="hover:bg-slate-800/40 transition-colors">
-                        <td className="px-2.5 py-1 font-medium text-white text-[11px] truncate max-w-[200px]">{client.client}</td>
-                        <td className="px-2 py-1 text-blue-400 font-medium font-mono text-[11px] whitespace-nowrap">{client.displayValue}</td>
-                        <td className="px-2 py-1 text-slate-200 text-[11px] truncate max-w-[120px]">{client.engineer}</td>
-                        <td className="px-2 py-1 text-slate-300 text-[11px] truncate max-w-[120px]">{client.salesPerson}</td>
-                        <td className="px-2 py-1">
-                          <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium whitespace-nowrap ${
-                            !isPending ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                          }`}>
-                            {!isPending ? 'Completed' : 'Pending'}
-                          </span>
+                      <tr key={client.id} className={`hover:bg-slate-800/40 transition-colors ${isCritical ? 'bg-rose-950/25' : ''}`}>
+                        <td className="px-2.5 py-1.5 font-medium text-white text-[11px] max-w-[200px]" title={client.client}>
+                          <div className="truncate font-semibold text-slate-100">{client.client}</div>
+                          <div className="text-[9px] text-slate-400 font-mono flex items-center gap-1.5">
+                            <span className="text-slate-300 font-bold">#{client.id}</span>
+                            <span>&bull;</span>
+                            <span>Enq: {client.enqDateRaw || (client.enqDate ? client.enqDate.substring(0, 10) : '-')}</span>
+                          </div>
+                        </td>
+                        <td className="px-2 py-1.5 text-blue-400 font-medium font-mono text-[11px] whitespace-nowrap">{client.displayValue}</td>
+                        <td className="px-2 py-1.5 text-slate-200 text-[11px] truncate max-w-[120px] font-medium">{client.engineer}</td>
+                        <td className="px-2 py-1.5 text-slate-300 text-[11px] truncate max-w-[120px]">{client.salesPerson}</td>
+                        <td className="px-2 py-1.5">
+                          {!isPending ? (
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-medium whitespace-nowrap bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                              Completed
+                            </span>
+                          ) : (
+                            <div className="flex flex-col gap-0.5">
+                              <span className={`px-1.5 py-0.5 rounded text-[10px] whitespace-nowrap border ${durationInfo?.severityClass}`} title={durationInfo?.fullText}>
+                                ⏳ Pending: {durationInfo?.label}
+                              </span>
+                              {durationInfo?.weeks >= 2 && (
+                                <span className="text-[9px] text-rose-400 font-semibold leading-tight">
+                                  {durationInfo.weeks} wks open
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </td>
                       </tr>
                     );

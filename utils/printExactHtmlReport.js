@@ -50,7 +50,7 @@ export function openExactHtmlPrintReport(leads, filterInfo = {}) {
     return `<span class="badge ${badgeClass}">${escapeHtml(label)}</span>`;
   }
 
-  function formatCostingStatus(val) {
+  function formatCostingStatus(val, enqDate = null) {
     if (!val) return '-';
     const s = String(val).trim().toLowerCase();
     let label = s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
@@ -62,6 +62,18 @@ export function openExactHtmlPrintReport(leads, filterInfo = {}) {
       badgeClass = 'cost-submitted';
     } else if (s === 'pending') {
       badgeClass = 'cost-pending';
+      if (enqDate) {
+        const d = new Date(enqDate);
+        if (!isNaN(d.getTime())) {
+          const days = Math.max(0, Math.floor((Date.now() - d.getTime()) / (1000 * 60 * 60 * 24)));
+          const weeks = Math.floor(days / 7);
+          if (weeks >= 1) {
+            label = `Pending (${weeks} wks)`;
+          } else if (days > 0) {
+            label = `Pending (${days}d)`;
+          }
+        }
+      }
     } else if (s.includes('progress') || s.includes('negotiat')) {
       badgeClass = 'cost-progress';
     } else if (s.includes('query') || s.includes('rejected')) {
@@ -179,8 +191,7 @@ export function openExactHtmlPrintReport(leads, filterInfo = {}) {
       <td>${escapeHtml(r.engineer)}</td>
       <td class="text-center nowrap">${escapeHtml(dateStr)}</td>
       <td class="text-center">${formatStatus(r.currentStatus)}</td>
-      <td class="text-right nowrap font-mono font-semibold price-cell">${formatInr(r.offerPrice)}</td>
-      <td class="text-center">${formatCostingStatus(r.costingStatus)}</td>
+      <td class="text-center">${formatCostingStatus(r.costingStatus, r.enqDate || r.enqDateRaw)}</td>
       <td class="text-center">${formatCostingStatus(r.costingAccepted || 'Accepted')}</td>
       <td class="text-center nowrap">${escapeHtml(r.completionDate || '-')}</td>
     </tr>`;
