@@ -434,6 +434,10 @@ def generate_all_pdfs():
     cust_str = df['Customer'].astype(str).str.strip().str.lower()
     df = df[~cust_str.str.startswith('total ')]
     df = df[~cust_str.isin(['total rows', 'total leads', 'total users', 'total statuses', 'total offer price', 'nan', '', '-'])]
+    if 'Costing Person' in df.columns and 'Assigned To' not in df.columns:
+        df['Assigned To'] = df['Costing Person']
+    elif 'Assigned To' not in df.columns:
+        df['Assigned To'] = 'Unassigned'
     df['Assigned To'] = df['Assigned To'].fillna('Unassigned').astype(str).str.strip()
     df['Assigned To'] = df['Assigned To'].replace(r'^\s*$', 'Unassigned', regex=True)
     df['Enquiry Date dt'] = pd.to_datetime(df['Enquiry Date'], errors='coerce')

@@ -37,6 +37,7 @@ function getSundayWeek(dateObj) {
 }
 
 const CANDIDATE_FILES = [
+  'costing-report-2026-09-28-05-05-57.csv',
   'costing-report-2026-09-21-05-42-31.csv',
   'costing-report-2026-09-12-04-43-39.csv',
   'costing-report-2026-09-07-05-54-30.csv',
@@ -79,7 +80,7 @@ export async function GET() {
     data.forEach(row => {
       const rawId = String(row.ID || row['\ufeffID'] || '').trim();
       const customer = String(row['Customer'] || row.client || '').trim();
-      const assignedTo = String(row['Assigned To'] || row.engineer || '').trim();
+      const assignedTo = String(row['Costing Person'] || row['Assigned To'] || row.engineer || '').trim();
 
       // Skip non-data or summary rows (e.g. Total Rows, Total Leads, etc.)
       if (!rawId || isNaN(Number(rawId))) return;
