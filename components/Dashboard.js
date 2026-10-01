@@ -133,6 +133,7 @@ export default function Dashboard() {
     let pending = 0;
     let completed = 0;
     let totalQuoteValue = 0;
+    let totalWonValue = 0;
 
     const engMap = {};
     const salesMap = {};
@@ -142,6 +143,8 @@ export default function Dashboard() {
     filteredLeads.forEach(lead => {
       totalAssigned += 1;
       totalQuoteValue += lead.offerPrice;
+      const isWon = lead.currentStatus === 'won';
+      if (isWon) totalWonValue += lead.offerPrice;
 
       // RULE: Costing is ONLY pending for these cases
       const isPending = lead.costingStatus === 'pending' || lead.costingStatus === 'revision_in_progress';
@@ -159,11 +162,12 @@ export default function Dashboard() {
       // Engineer aggregations
       if (!engMap[lead.engineer]) {
         engMap[lead.engineer] = {
-          name: lead.engineer, assigned: 0, completed: 0, pending: 0, totalValue: 0
+          name: lead.engineer, assigned: 0, completed: 0, pending: 0, totalValue: 0, wonValue: 0
         };
       }
       engMap[lead.engineer].assigned += 1;
       engMap[lead.engineer].totalValue += lead.offerPrice;
+      if (isWon) engMap[lead.engineer].wonValue += lead.offerPrice;
       if (isCompleted) engMap[lead.engineer].completed += 1;
       if (isPending) engMap[lead.engineer].pending += 1;
 
@@ -213,7 +217,8 @@ export default function Dashboard() {
         pending,
         topEngineer,
         avgCostingPerMonth,
-        totalQuoteValue: formatMoney(totalQuoteValue)
+        totalQuoteValue: formatMoney(totalQuoteValue),
+        totalWonValue: formatMoney(totalWonValue)
       },
       engineerPerformance: perfArray,
       salesData: salesArray,
@@ -357,6 +362,10 @@ export default function Dashboard() {
             <span className="text-[9px] uppercase font-bold text-slate-400">Quote:</span>
             <span className="text-xs font-bold text-pink-400 font-mono">{kpiData.totalQuoteValue}</span>
           </div>
+          <div className="flex items-center space-x-1 bg-slate-900/90 border border-slate-700/60 rounded-md px-2 py-0.5">
+            <span className="text-[9px] uppercase font-bold text-slate-400">Won:</span>
+            <span className="text-xs font-bold text-emerald-400 font-mono">{kpiData.totalWonValue}</span>
+          </div>
         </div>
 
         {/* Right: Dropdown Filters */}
@@ -466,23 +475,25 @@ export default function Dashboard() {
             <table className="w-full text-left text-xs text-slate-300">
               <thead className="text-[10px] uppercase bg-slate-900 text-slate-400 sticky top-0 z-10 border-b border-slate-700/80 shadow-sm">
                 <tr>
-                  <th className="px-2.5 py-1.5 bg-slate-900 font-bold">Costing Person</th>
-                  <th className="px-1.5 py-1.5 bg-slate-900 font-bold text-center">Assigned</th>
-                  <th className="px-1.5 py-1.5 bg-slate-900 font-bold text-center">{selectedWeek !== 'All' ? 'Wk Comp' : 'Comp'}</th>
-                  <th className="px-1.5 py-1.5 bg-slate-900 font-bold text-center" title="All open pending costings till date">{selectedWeek !== 'All' ? 'All Pend' : 'Pend'}</th>
+                  <th className="px-2 py-1.5 bg-slate-900 font-bold">Costing Person</th>
+                  <th className="px-1 py-1.5 bg-slate-900 font-bold text-center">Assigned</th>
+                  <th className="px-1 py-1.5 bg-slate-900 font-bold text-center">{selectedWeek !== 'All' ? 'Wk Comp' : 'Comp'}</th>
+                  <th className="px-1 py-1.5 bg-slate-900 font-bold text-center" title="All open pending costings till date">{selectedWeek !== 'All' ? 'All Pend' : 'Pend'}</th>
+                  <th className="px-2 py-1.5 bg-slate-900 font-bold text-right">Won Value</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {engineerPerformance.map((eng, idx) => (
                   <tr key={idx} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="px-2.5 py-1 font-medium text-white text-[11px] truncate max-w-[130px]">{eng.name}</td>
-                    <td className="px-1.5 py-1 text-center font-mono text-[11px]">{eng.assigned}</td>
-                    <td className="px-1.5 py-1 text-center font-mono text-[11px] font-semibold text-emerald-400">{eng.completed}</td>
-                    <td className="px-1.5 py-1 text-center font-mono text-[11px] font-semibold text-amber-400">{eng.pending}</td>
+                    <td className="px-2 py-1 font-medium text-white text-[11px] truncate max-w-[105px]" title={eng.name}>{eng.name}</td>
+                    <td className="px-1 py-1 text-center font-mono text-[11px]">{eng.assigned}</td>
+                    <td className="px-1 py-1 text-center font-mono text-[11px] font-semibold text-emerald-400">{eng.completed}</td>
+                    <td className="px-1 py-1 text-center font-mono text-[11px] font-semibold text-amber-400">{eng.pending}</td>
+                    <td className="px-2 py-1 text-right font-mono text-[11px] font-bold text-emerald-400">{formatMoney(eng.wonValue || 0)}</td>
                   </tr>
                 ))}
                 {engineerPerformance.length === 0 && (
-                  <tr><td colSpan="4" className="text-center py-4 text-slate-500 text-xs">No data found</td></tr>
+                  <tr><td colSpan="5" className="text-center py-4 text-slate-500 text-xs">No data found</td></tr>
                 )}
               </tbody>
             </table>
