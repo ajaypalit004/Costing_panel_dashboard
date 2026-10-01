@@ -152,7 +152,7 @@ ID,Customer,"Sales Person","Costing Person","Enquiry Date","Current Status","Off
 221,"Shree Cement Ltd | Gurugram","Puneet Sharma",Rakesh,2026-08-17,quoted,19104630.00,done,Accepted,2026-08-17,2026-08-19
 222," Dalmia Kadappa-2, Telengana","Puneet Sharma",Rakesh,2026-08-21,,,technical_offer_submitted,Accepted,2026-08-24,2026-09-04
 223,"LORI KEETAMENITIES (PARUL HOTEL)","Anil Yadav","Anil Yadav",2026-07-24,won,1240000.00,revised_offer_submitted,Accepted,2026-08-22,2026-08-31
-224,"A one Builders ","Anil Yadav","Anil Yadav",2026-08-13,quoted,7966801.00,revision_in_progress,Accepted,2026-08-24,2026-08-24
+224,"A one Builders ","Anil Yadav","Anil Yadav",2026-08-13,won,7568489.45,revised_offer_submitted,Accepted,2026-08-24,2026-08-24
 225,"A one Builders ","Anil Yadav","Anil Yadav",2026-08-13,quoted,2472700.00,done,Accepted,2026-08-24,2026-08-17
 227,"A one Builders ","Anil Yadav","Anil Yadav",2026-08-19,quoted,3673196.00,done,Accepted,2026-08-25,2026-08-25
 228,GHADI,"Deepak Janyani","Deepak Janyani",2026-08-25,quoted,4766056.00,first_offer_submitted,Accepted,2026-08-25,
@@ -201,7 +201,7 @@ ID,Customer,"Sales Person","Costing Person","Enquiry Date","Current Status","Off
 276,"LITHINA ENERGY SOLUTIONS","Deepak Janyani","Deepak Janyani",2026-08-21,won,625000.00,revised_offer_submitted,Accepted,2026-09-12,2026-09-16
 278,"HUMERS INFRA ","Anil Yadav","Anil Yadav",2026-09-10,quoted,514000.00,first_offer_submitted,Accepted,2026-09-12,2026-09-11
 279,"CONTRACTOR NARPAT SINGH-CPWD","Deepak Janyani","Deepak Janyani",2026-09-10,quoted,244700.00,revised_offer_submitted,Accepted,2026-09-12,2026-09-25
-280,"MAHADEV AGRO TRADERS & CONSTRUCTION","Anil Yadav","Anil Yadav",2026-09-09,under_negotiation,400000.00,first_offer_submitted,Accepted,,
+280,"MAHADEV AGRO TRADERS & CONSTRUCTION","Anil Yadav","Anil Yadav",2026-09-09,lost,400000.00,first_offer_submitted,Accepted,,
 281,"RK LITES",Akhilesh,"RamKrishna Pandey",2026-09-10,quoted,269900.00,first_offer_submitted,Accepted,2026-09-12,2026-09-12
 283,"AARYAN VENTURA PVT LTD.",Akhilesh,"Aashu ",2026-08-25,pending,4482400.00,first_offer_submitted,Accepted,2026-09-12,2026-09-04
 284,"Maheshwari Contractors Pvt. Ltd.",Akhilesh,Akhilesh,2026-08-03,quoted,15104200.00,revised_offer_submitted,Accepted,2026-09-12,2026-08-12
@@ -213,8 +213,8 @@ ID,Customer,"Sales Person","Costing Person","Enquiry Date","Current Status","Off
 291,"Vatanukulan Engineers","Amit Gautam",Akhilesh,2026-09-14,won,376000.00,first_offer_submitted,Accepted,,2026-09-18
 292,"Prasheetan Aircon","Amit Gautam","RamKrishna Pandey",2026-09-12,won,,revised_offer_submitted,Accepted,,2026-09-17
 293,"AGARWAL COAL CORPORATION PVT. LTD.","Deepak Janyani","Deepak Janyani",2026-09-21,quoted,1308200.00,first_offer_submitted,Accepted,2026-09-21,2026-09-21
-294,"Manipal University ","Anil Yadav","Anil Yadav",2026-09-18,under_negotiation,718535.00,revised_offer_submitted,Accepted,2026-09-23,
-295,"Indrox Global Pvt Ltd","Puneet Sharma",Rakesh,2026-09-23,pending,,pending,Accepted,2026-09-26,
+294,"Manipal University ","Anil Yadav","Anil Yadav",2026-09-18,won,695500.00,revised_offer_submitted,Accepted,2026-09-23,
+295,"Indrox Global Pvt Ltd","Puneet Sharma",Rakesh,2026-09-23,quoted,5700000.00,first_offer_submitted,Accepted,2026-09-26,2026-09-29
 297,Dmart,"mohan shyam","Aditya Soni",2026-09-21,won,3050000.00,first_offer_submitted,Accepted,2026-09-25,2026-09-22
 298,Dmart,"mohan shyam","Aditya Soni",2026-09-25,pending,,pending,Accepted,2026-09-26,
 299,"Shri Balaji  Industries","mohan shyam","Bhavika Choudhary",2026-09-22,quoted,2855565.00,first_offer_submitted,Accepted,2026-09-25,2026-09-24
@@ -222,3 +222,14 @@ ID,Customer,"Sales Person","Costing Person","Enquiry Date","Current Status","Off
 305,"CONTRACTOR NARPAT SINGH-CPWD","Deepak Janyani","Deepak Janyani",2026-09-25,quoted,555800.00,first_offer_submitted,Accepted,2026-09-25,2026-09-25
 306,"SEFRICODE ","Anil Yadav","Anil Yadav",2026-09-22,won,320075.00,revised_offer_submitted,Accepted,2026-09-26,2026-09-24
 307,"Aditya aluminium, Hindalco industries Ltd.","Bhupender Sharma","Deepak Janyani",2026-09-24,pending,,technical_offer_submitted,Accepted,2026-09-26,2026-09-24
+308,"Ultratech cement Ltd., ","Bhupender Sharma","Deepak Janyani",2026-09-24,pending,,pending,Accepted,2026-09-28,
+309,"Innomotics india Pvt. Ltd.","Bhupender Sharma","Deepak Janyani",2026-09-22,pending,,pending,Accepted,2026-09-28,
+311,"SEFRICODE ","Anil Yadav","Anil Yadav",2026-09-28,quoted,1227903.00,first_offer_submitted,Accepted,2026-09-29,2026-09-29
+313,"OP GEHLOT ENGINEERS","Amit Gautam",Akhilesh,2026-09-25,won,,first_offer_submitted,Accepted,,
+314,"Krishna Aircon ","Anil Yadav","Anil Yadav",2026-09-23,won,11800.00,first_offer_submitted,Accepted,2026-09-30,2026-09-29
+315,"National Engineering Industries Limited","SURAJ SHARMA","SURAJ SHARMA",2026-09-03,won,810000.00,first_offer_submitted,Accepted,2026-10-01,2026-09-19
+316,"National Engineering Industries Limited","SURAJ SHARMA","SURAJ SHARMA",2026-09-20,quoted,433500.00,first_offer_submitted,Accepted,2026-10-01,2026-09-24
+317,"National Engineering Industries Limited","SURAJ SHARMA","SURAJ SHARMA",2026-09-26,pending,,pending,Accepted,2026-10-01,
+318,"National Engineering Industries Limited","SURAJ SHARMA","SURAJ SHARMA",2026-09-26,pending,,pending,Accepted,2026-10-01,
+319,"National Engineering Industries Limited","SURAJ SHARMA","SURAJ SHARMA",2026-10-01,pending,40000.00,first_offer_submitted,Accepted,2026-10-01,2026-10-01
+320,"National Engineering Industries Limited","SURAJ SHARMA","SURAJ SHARMA",2026-09-29,pending,766000.00,first_offer_submitted,Accepted,2026-10-01,
