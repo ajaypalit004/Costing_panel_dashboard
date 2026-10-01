@@ -195,12 +195,33 @@ def generate_html_content(df, period_label):
         row_class = 'even-row' if idx % 2 == 0 else 'odd-row'
         rows_html += f'<tr class="{row_class}"><td class="text-center font-bold">{lead_id}</td><td class="customer-name font-semibold">{customer}</td><td>{assigned}</td><td class="text-center nowrap">{enq_date}</td><td class="text-center">{curr_status}</td><td class="text-right nowrap font-mono font-semibold price-cell">{price}</td><td class="text-center">{cost_status}</td><td class="text-center">{result}</td><td class="text-center nowrap">{completion}</td></tr>\n'
 
-    if not df['Enquiry Date dt'].dropna().empty:
+    p_lower = str(period_label).lower().strip()
+    month_name_to_range = {
+        'march 2026': '01-Mar-2026 to 31-Mar-2026',
+        'april 2026': '01-Apr-2026 to 30-Apr-2026',
+        'may 2026': '01-May-2026 to 31-May-2026',
+        'june 2026': '01-Jun-2026 to 30-Jun-2026',
+        'july 2026': '01-Jul-2026 to 31-Jul-2026',
+        'august 2026': '01-Aug-2026 to 31-Aug-2026',
+        'september 2026': '01-Sep-2026 to 30-Sep-2026',
+        'october 2026': '01-Oct-2026 to 31-Oct-2026',
+    }
+
+    if p_lower in month_name_to_range:
+        date_range_str = month_name_to_range[p_lower]
+    elif any(m in p_lower for m in month_name_to_range):
+        matched_m = [m for m in month_name_to_range if m in p_lower][0]
+        date_range_str = month_name_to_range[matched_m]
+    elif 'latest week' in p_lower:
+        date_range_str = period_label
+    elif not df['Enquiry Date dt'].dropna().empty:
         min_date = df['Enquiry Date dt'].min().strftime('%d-%b-%Y')
         max_date = df['Enquiry Date dt'].max().strftime('%d-%b-%Y')
         date_range_str = f"{min_date} to {max_date}" if min_date != max_date else min_date
     else:
         date_range_str = period_label
+
+    now_generated = pd.Timestamp.now().strftime('%d-%b-%Y %I:%M %p')
 
     html_content = f'''<!DOCTYPE html>
 <html lang="en">
@@ -278,7 +299,7 @@ def generate_html_content(df, period_label):
     <div class="header-meta">
         <div><strong>Period / Date Range:</strong> {date_range_str}</div>
         <div><strong>Total Enquiries:</strong> {total_leads} Records</div>
-        <div><strong>Generated:</strong> 26-Aug-2026</div>
+        <div><strong>Generated:</strong> {now_generated}</div>
     </div>
 </div>
 

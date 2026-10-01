@@ -203,6 +203,19 @@ export function openExactHtmlPrintReport(leads, filterInfo = {}) {
       ? filterInfo.weekLabel 
       : 'All Records';
 
+  const monthNameToRange = {
+    'march 2026': '01-Mar-2026 to 31-Mar-2026',
+    'april 2026': '01-Apr-2026 to 30-Apr-2026',
+    'may 2026': '01-May-2026 to 31-May-2026',
+    'june 2026': '01-Jun-2026 to 30-Jun-2026',
+    'july 2026': '01-Jul-2026 to 31-Jul-2026',
+    'august 2026': '01-Aug-2026 to 31-Aug-2026',
+    'september 2026': '01-Sep-2026 to 30-Sep-2026',
+    'october 2026': '01-Oct-2026 to 31-Oct-2026',
+  };
+  const pLower = String(periodLabel).toLowerCase().trim();
+  const dateRangeStr = monthNameToRange[pLower] || (filterInfo.weekLabel ? filterInfo.weekLabel : periodLabel);
+
   const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -290,7 +303,7 @@ export function openExactHtmlPrintReport(leads, filterInfo = {}) {
         <div class="report-subtitle">Comprehensive Costing Tracking & Status Report</div>
     </div>
     <div class="header-meta">
-        <div><strong>Period / Filter:</strong> ${escapeHtml(periodLabel)}</div>
+        <div><strong>Period / Date Range:</strong> ${escapeHtml(dateRangeStr)}</div>
         <div><strong>Total Enquiries:</strong> ${totalLeads} Records</div>
         <div><strong>Generated:</strong> ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
     </div>
