@@ -107,7 +107,7 @@ ID,Customer,Sales Person,Costing Person,Enquiry Date,Current Status,Offer Price,
 167,Malani,mohan shyam,mohan shyam,2026-06-09,won,421000.0,pending,Accepted,2026-09-07,2026-06-26,2026-06-26
 168,ASA,mohan shyam,mohan shyam,2026-06-12,won,1330000.0,pending,Accepted,2026-09-07,2026-06-26,2026-06-26
 169,Galactic,mohan shyam,mohan shyam,2026-06-22,won,4545000.0,pending,Accepted,2026-09-07,2026-06-26,2026-06-26
-170,TECHNICAL CONSULTANT,Aditya Soni,Aditya Soni,2026-06-24,won,3580807.0,revised_offer_submitted,Accepted,2026-06-27,2026-09-12,2026-09-12
+170,TECHNICAL CONSULTANT,Aditya Soni,Aditya Soni,2026-06-24,technical_qualification_passed,5563501.0,revised_offer_submitted,Accepted,2026-06-27,2026-09-12,2026-09-12
 171,Shree Cement Ltd | Gurugram,Puneet Sharma,Rakesh,2026-06-29,quoted,51021989.0,done,Accepted,2026-07-01,2026-07-11,2026-07-11
 172,  J K CEMENT ,Puneet Sharma,Aashu ,2026-06-27,pending,0.0,pending,Accepted,2026-07-03,,
 173,Shree Cement Ltd | Gurugram,Puneet Sharma,Rakesh,2026-06-30,lost,4300000.0,done,Accepted,2026-07-06,2026-07-11,2026-07-11
