@@ -297,8 +297,8 @@ def generate_html_content(df, period_label):
         <div class="report-subtitle">Comprehensive Costing Tracking & Status Report</div>
     </div>
     <div class="header-meta">
-        <div><strong>Period / Date Range:</strong> {date_range_str}</div>
-        <div><strong>Total Enquiries:</strong> {total_leads} Records</div>
+        <div><strong>Date Range:</strong> {date_range_str}</div>
+        <div><strong>Total Enquiries:</strong> {total_leads} Records ({period_label})</div>
         <div><strong>Generated:</strong> {now_generated}</div>
     </div>
 </div>
