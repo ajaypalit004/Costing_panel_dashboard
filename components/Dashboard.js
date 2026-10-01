@@ -74,8 +74,19 @@ export default function Dashboard() {
   }, [leads]);
 
   const months = useMemo(() => {
-    const m = Array.from(new Set(leads.map(l => l.monthYear))).sort();
-    return ['All', ...m];
+    const monthOrder = ["April 2026", "May 2026", "June 2026", "July 2026", "August 2026", "September 2026", "October 2026"];
+    const mSet = new Set();
+    leads.forEach(l => {
+      if (l.monthYear) mSet.add(l.monthYear);
+      if (Array.isArray(l.months)) l.months.forEach(m => mSet.add(m));
+    });
+    const sorted = Array.from(mSet).sort((a, b) => {
+      const idxA = monthOrder.indexOf(a);
+      const idxB = monthOrder.indexOf(b);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      return a.localeCompare(b);
+    });
+    return ['All', ...sorted];
   }, [leads]);
 
   const engineers = useMemo(() => {
@@ -99,14 +110,14 @@ export default function Dashboard() {
       let matchMonth = true;
       if (selectedWeek === 'LATEST') {
         // RULE: For selected week, retain ALL pending costings till date regardless of week
-        matchWeek = isPending || (l.weekKey === latestWeekKey);
-        matchMonth = selectedMonth === 'All' || isPending || (l.monthYear === selectedMonth);
+        matchWeek = isPending || (l.weekKey === latestWeekKey) || (Array.isArray(l.weeks) && l.weeks.includes(latestWeekKey));
+        matchMonth = selectedMonth === 'All' || isPending || (l.monthYear === selectedMonth) || (Array.isArray(l.months) && l.months.includes(selectedMonth));
       } else if (selectedWeek !== 'All') {
         // RULE: For any specific week, retain ALL pending costings till date regardless of week
-        matchWeek = isPending || (l.weekKey === selectedWeek);
-        matchMonth = selectedMonth === 'All' || isPending || (l.monthYear === selectedMonth);
+        matchWeek = isPending || (l.weekKey === selectedWeek) || (Array.isArray(l.weeks) && l.weeks.includes(selectedWeek));
+        matchMonth = selectedMonth === 'All' || isPending || (l.monthYear === selectedMonth) || (Array.isArray(l.months) && l.months.includes(selectedMonth));
       } else {
-        matchMonth = selectedMonth === 'All' || l.monthYear === selectedMonth;
+        matchMonth = selectedMonth === 'All' || (isPending && (selectedMonth === 'September 2026' || selectedMonth === 'October 2026')) || (l.monthYear === selectedMonth) || (Array.isArray(l.months) && l.months.includes(selectedMonth));
       }
 
       const matchEng = selectedEngineer === 'All' || l.engineer === selectedEngineer;
@@ -564,10 +575,29 @@ export default function Dashboard() {
                       <tr key={client.id} className={`hover:bg-slate-800/40 transition-colors ${isCritical ? 'bg-rose-950/25' : ''}`}>
                         <td className="px-2.5 py-1.5 font-medium text-white text-[11px] max-w-[200px]" title={client.client}>
                           <div className="truncate font-semibold text-slate-100">{client.client}</div>
-                          <div className="text-[9px] text-slate-400 font-mono flex items-center gap-1.5">
+                          <div className="text-[9px] text-slate-400 font-mono flex items-center gap-1.5 flex-wrap">
                             <span className="text-slate-300 font-bold">#{client.id}</span>
                             <span>&bull;</span>
                             <span>Enq: {client.enqDateRaw || (client.enqDate ? client.enqDate.substring(0, 10) : '-')}</span>
+                            {client.offerSubmissionDate && client.offerSubmissionDate !== '-' && (
+                              <>
+                                <span>&bull;</span>
+                                <span className="text-sky-300">Sub: {client.offerSubmissionDate}</span>
+                              </>
+                            )}
+                            {client.currentStatus && (
+                              <>
+                                <span>&bull;</span>
+                                <span className={`px-1 py-0.2 rounded text-[8px] font-bold uppercase ${
+                                  client.currentStatus === 'won' ? 'bg-emerald-500/20 text-emerald-400' :
+                                  client.currentStatus === 'lost' ? 'bg-rose-500/20 text-rose-400' :
+                                  client.currentStatus === 'quoted' ? 'bg-blue-500/20 text-blue-400' :
+                                  'bg-amber-500/20 text-amber-400'
+                                }`}>
+                                  {client.currentStatus}
+                                </span>
+                              </>
+                            )}
                           </div>
                         </td>
                         <td className="px-2 py-1.5 text-blue-400 font-medium font-mono text-[11px] whitespace-nowrap">{client.displayValue}</td>

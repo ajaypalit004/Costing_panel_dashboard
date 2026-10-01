@@ -420,12 +420,29 @@ def render_and_save(page, html_content, output_path):
     print(f"Rendered: {output_path}")
 
 def generate_all_pdfs():
+    excel_files = glob.glob('costing-report*.xlsx')
     csv_files = glob.glob('costing-report*.csv')
-    if not csv_files:
-        print("No CSV found.")
+    
+    data_path = None
+    if os.path.exists('costing-report-updated-latest.xlsx'):
+        data_path = 'costing-report-updated-latest.xlsx'
+    elif os.path.exists('costing-report-2026-10-01-updated.xlsx'):
+        data_path = 'costing-report-2026-10-01-updated.xlsx'
+    elif os.path.exists('costing-report-2026-10-01-updated.csv'):
+        data_path = 'costing-report-2026-10-01-updated.csv'
+    elif excel_files:
+        data_path = max(excel_files, key=os.path.getctime)
+    elif csv_files:
+        data_path = max(csv_files, key=os.path.getctime)
+    else:
+        print("No Costing data file found.")
         return
-    csv_path = max(csv_files, key=os.path.getctime)
-    df = pd.read_csv(csv_path)
+
+    print(f"Generating PDFs using: {data_path}")
+    if data_path.endswith('.xlsx'):
+        df = pd.read_excel(data_path)
+    else:
+        df = pd.read_csv(data_path)
 
     df['ID_num'] = pd.to_numeric(df.iloc[:, 0], errors='coerce')
     df = df.dropna(subset=['ID_num'])
@@ -441,12 +458,19 @@ def generate_all_pdfs():
     df['Assigned To'] = df['Assigned To'].fillna('Unassigned').astype(str).str.strip()
     df['Assigned To'] = df['Assigned To'].replace(r'^\s*$', 'Unassigned', regex=True)
     df['Enquiry Date dt'] = pd.to_datetime(df['Enquiry Date'], errors='coerce')
-    df = df.sort_values(by=['Enquiry Date dt', 'ID'], ascending=[False, False])
+    
+    sub_col = 'Offer Submission Date' if 'Offer Submission Date' in df.columns else 'Costing completion date'
+    df['Offer Sub Date dt'] = pd.to_datetime(df[sub_col], errors='coerce')
+    df['Completion Date dt'] = pd.to_datetime(df['Costing completion date'], errors='coerce')
+    df['Activity Date dt'] = df['Offer Sub Date dt'].combine_first(df['Completion Date dt']).combine_first(df['Enquiry Date dt'])
+    
+    df = df.sort_values(by=['Activity Date dt', 'ID'], ascending=[False, False])
     df['Current Status Lower'] = df['Current Status'].astype(str).str.lower()
     df['Offer Price Num'] = pd.to_numeric(df['Offer Price'], errors='coerce').fillna(0)
     df['Costing Status Lower'] = df['Costing Status'].astype(str).str.lower().str.strip()
     df['is_costing_done'] = ~df['Costing Status Lower'].isin(['pending', 'revision_in_progress', ''])
-    df['Month_Year'] = df['Enquiry Date dt'].dt.strftime('%B %Y')
+    df['Month_Year'] = df['Activity Date dt'].dt.strftime('%B %Y')
+    df['Enquiry Month_Year'] = df['Enquiry Date dt'].dt.strftime('%B %Y')
 
     with sync_playwright() as p:
         browser = p.chromium.launch()
@@ -456,25 +480,36 @@ def generate_all_pdfs():
         html_master = generate_html_content(df, 'All Records')
         render_and_save(page, html_master, 'costing_report.pdf')
         shutil.copy2('costing_report.pdf', 'public/costing_report.pdf')
-        shutil.copy2('costing_report.pdf', '../costing_report.pdf')
+        if os.path.exists('../costing_report.pdf'):
+            shutil.copy2('costing_report.pdf', '../costing_report.pdf')
 
         # 2. Monthly PDFs
-        unique_months = df['Month_Year'].dropna().unique()
-        for m in unique_months:
-            df_month = df[df['Month_Year'] == m]
-            m_slug = m.lower().replace(' ', '_')
-            html_m = generate_html_content(df_month, m)
-            out_file = f'public/reports/costing_report_{m_slug}.pdf'
-            render_and_save(page, html_m, out_file)
+        months_set = set(df['Month_Year'].dropna().unique()).union(set(df['Enquiry Month_Year'].dropna().unique()))
+        month_order = ["April 2026", "May 2026", "June 2026", "July 2026", "August 2026", "September 2026", "October 2026"]
+        sorted_months = sorted(list(months_set), key=lambda x: month_order.index(x) if x in month_order else 99)
 
-        # 3. Latest Week PDF
-        latest_date = df['Enquiry Date dt'].max()
+        for m in sorted_months:
+            is_m = (df['Month_Year'] == m) | (df['Enquiry Month_Year'] == m)
+            if 'september' in m.lower() or 'october' in m.lower():
+                is_m = is_m | (~df['is_costing_done'])
+            df_month = df[is_m].copy()
+            if not df_month.empty:
+                m_slug = m.lower().replace(' ', '_')
+                html_m = generate_html_content(df_month, m)
+                out_file = f'public/reports/costing_report_{m_slug}.pdf'
+                render_and_save(page, html_m, out_file)
+
+        # 3. Latest Week PDF (Work in latest week + enquiries in latest week + ALL open pending costings till date)
+        latest_date = df['Activity Date dt'].max()
+        if pd.isna(latest_date):
+            latest_date = df['Enquiry Date dt'].max()
         day_diff = latest_date.weekday() + 1
         if day_diff == 7: day_diff = 0
         latest_sun = latest_date - pd.Timedelta(days=day_diff)
         week_end = latest_sun + pd.Timedelta(days=7)
-        # 3. Latest Week PDF (Work in latest week + ALL open pending costings till date)
-        is_in_week = (df['Enquiry Date dt'] >= latest_sun) & (df['Enquiry Date dt'] <= week_end)
+        
+        is_in_week = ((df['Activity Date dt'] >= latest_sun) & (df['Activity Date dt'] <= week_end)) | \
+                     ((df['Enquiry Date dt'] >= latest_sun) & (df['Enquiry Date dt'] <= week_end))
         df_latest_week = df[is_in_week | (~df['is_costing_done'])].copy()
         if df_latest_week.empty:
             df_latest_week = df.head(10)

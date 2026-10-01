@@ -37,6 +37,9 @@ function getSundayWeek(dateObj) {
 }
 
 const CANDIDATE_FILES = [
+  'costing-report-updated-latest.xlsx',
+  'costing-report-2026-10-01-updated.xlsx',
+  'costing-report-2026-10-01-updated.csv',
   'costing-report-2026-10-01-10-25-17.csv',
   'costing-report-2026-09-28-05-05-57.csv',
   'costing-report-2026-09-21-05-42-31.csv',
@@ -49,21 +52,20 @@ const CANDIDATE_FILES = [
 
 function getLatestDataFile() {
   const dir = process.cwd();
-  try {
-    const files = fs.readdirSync(dir);
-    const costingFiles = files.filter(f => f.startsWith('costing-report') && f.endsWith('.csv')).sort().reverse();
-    if (costingFiles.length > 0) {
-      return path.join(dir, costingFiles[0]);
-    }
-  } catch (e) {
-    console.error('Error scanning directory for costing CSV:', e);
-  }
-
   for (const filename of CANDIDATE_FILES) {
     const fullPath = path.join(dir, filename);
     if (fs.existsSync(fullPath)) {
       return fullPath;
     }
+  }
+  try {
+    const files = fs.readdirSync(dir);
+    const costingFiles = files.filter(f => (f.startsWith('costing-report') && (f.endsWith('.csv') || f.endsWith('.xlsx')))).sort().reverse();
+    if (costingFiles.length > 0) {
+      return path.join(dir, costingFiles[0]);
+    }
+  } catch (e) {
+    console.error('Error scanning directory for costing file:', e);
   }
   return path.join(dir, CANDIDATE_FILES[0]);
 }
@@ -96,9 +98,36 @@ export async function GET() {
       const enqDate = parseDate(row['Enquiry Date']);
       const daysOpen = Math.floor((Date.now() - enqDate.getTime()) / (1000 * 60 * 60 * 24));
       
-      // Formatting Month Name (e.g., "April 2026")
-      const monthYear = enqDate.toLocaleString('default', { month: 'long', year: 'numeric' });
-      const weekInfo = getSundayWeek(enqDate);
+      const offerSubDateRaw = row['Offer Submission Date'] || row['Costing completion date'];
+      let offerSubDate = null;
+      if (offerSubDateRaw) {
+        const d = parseDate(offerSubDateRaw);
+        if (!isNaN(d.getTime())) offerSubDate = d;
+      }
+
+      // Primary reporting date: use offer submission date if available, else enquiry date
+      const primaryDate = offerSubDate || enqDate;
+      const monthYear = primaryDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+      const weekInfo = getSundayWeek(primaryDate);
+
+      // Collect all associated months and weeks for multi-period matching
+      const allMonths = new Set();
+      const allWeeks = new Set();
+      
+      if (!isNaN(enqDate.getTime())) {
+        allMonths.add(enqDate.toLocaleString('default', { month: 'long', year: 'numeric' }));
+        allWeeks.add(getSundayWeek(enqDate).weekKey);
+      }
+      if (offerSubDate) {
+        allMonths.add(offerSubDate.toLocaleString('default', { month: 'long', year: 'numeric' }));
+        allWeeks.add(getSundayWeek(offerSubDate).weekKey);
+      }
+      
+      const isPending = costingStatus === 'pending' || costingStatus === 'revision_in_progress' || !costingStatus;
+      if (isPending) {
+        allMonths.add('September 2026');
+        allMonths.add('October 2026');
+      }
 
       const formatDateStr = (val) => {
         if (!val) return '-';
@@ -117,12 +146,15 @@ export async function GET() {
         costingAccepted: String(row['costing accepted or rejected'] || '').trim(),
         costingAcceptedDate: formatDateStr(row['Costing accepted date']),
         completionDate: formatDateStr(row['Costing completion date']),
+        offerSubmissionDate: formatDateStr(offerSubDateRaw),
         offerPrice,
         enqDate: enqDate.toISOString(),
         enqDateRaw: formatDateStr(row['Enquiry Date']),
         monthYear,
+        months: Array.from(allMonths),
         weekKey: weekInfo.weekKey,
         weekLabel: weekInfo.weekLabel,
+        weeks: Array.from(allWeeks),
         daysOpen: daysOpen >= 0 ? daysOpen : 0
       });
     });
