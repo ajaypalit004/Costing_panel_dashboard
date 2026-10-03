@@ -81,13 +81,17 @@ def generate_html_content(df, period_label):
     total_leads = len(df)
     won_count = (df['Current Status Lower'] == 'won').sum()
     quoted_count = (df['Current Status Lower'] == 'quoted').sum()
-    pending_count = (df['Current Status Lower'] == 'pending').sum()
     negotiation_count = (df['Current Status Lower'] == 'under_negotiation').sum()
     lost_count = (df['Current Status Lower'] == 'lost').sum()
+    pending_mask = ~df['Current Status Lower'].isin(['won', 'quoted', 'under_negotiation', 'lost'])
+    pending_count = pending_mask.sum()
 
     total_pipeline = df['Offer Price Num'].sum()
     won_value = df[df['Current Status Lower'] == 'won']['Offer Price Num'].sum()
     quoted_value = df[df['Current Status Lower'] == 'quoted']['Offer Price Num'].sum()
+    negotiation_value = df[df['Current Status Lower'] == 'under_negotiation']['Offer Price Num'].sum()
+    pending_value = df[pending_mask]['Offer Price Num'].sum()
+    lost_value = df[df['Current Status Lower'] == 'lost']['Offer Price Num'].sum()
 
     # CALCULATE HIGHEST NUMBER OF COSTING DONE BY COSTING PERSON (ONLY ONE SINGLE TOP PERSON)
     costing_done_counts = df[df['is_costing_done']].groupby('Assigned To').size().sort_values(ascending=False)
@@ -323,17 +327,17 @@ def generate_html_content(df, period_label):
     <div class="kpi-card">
         <div class="kpi-title">Under Negotiation</div>
         <div class="kpi-value" style="color:#7e22ce;">{negotiation_count}</div>
-        <div class="kpi-sub">Active Discussions</div>
+        <div class="kpi-sub">₹ {(negotiation_value/10000000):.2f} Cr Active</div>
     </div>
     <div class="kpi-card">
         <div class="kpi-title">Pending Enquiries</div>
         <div class="kpi-value" style="color:#b45309;">{pending_count}</div>
-        <div class="kpi-sub">Awaiting Quote/Review</div>
+        <div class="kpi-sub">₹ {(pending_value/10000000):.2f} Cr Pending</div>
     </div>
     <div class="kpi-card">
         <div class="kpi-title">Lost / Inactive</div>
         <div class="kpi-value" style="color:#b91c1c;">{lost_count}</div>
-        <div class="kpi-sub">Closed Unsuccessful</div>
+        <div class="kpi-sub">₹ {(lost_value/10000000):.2f} Cr Lost</div>
     </div>
 </div>
 
@@ -356,7 +360,7 @@ def generate_html_content(df, period_label):
     </div>
     <div class="kpi-card-5">
         <div class="kpi-title">TOTAL ORDER VALUE QUOTED</div>
-        <div class="kpi-value" style="color:#1d4ed8;">{format_inr(total_pipeline)}</div>
+        <div class="kpi-value" style="color:#1d4ed8;">{format_inr(quoted_value)}</div>
         <div class="kpi-sub">{quoted_count} Offers Quoted</div>
     </div>
     <div class="kpi-card-5">
@@ -519,6 +523,10 @@ def generate_all_pdfs():
                 html_m = generate_html_content(df_month, m)
                 out_file = f'public/reports/costing_report_{m_slug}.pdf'
                 render_and_save(page, html_m, out_file)
+                if 'september' in m.lower():
+                    dest_folder_pdf = 'd:/source_code/folder/Costing monthly september report.pdf'
+                    shutil.copy2(out_file, dest_folder_pdf)
+                    print(f"Copied {out_file} to {dest_folder_pdf}")
 
         # 3. Latest Week PDF (Work in latest week + enquiries in latest week + ALL open pending costings till date)
         latest_date = df['Activity Date dt'].max()
