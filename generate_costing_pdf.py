@@ -516,24 +516,37 @@ def generate_all_pdfs():
         shutil.copy2('costing_report.pdf', 'public/costing_report.pdf')
         if os.path.exists('../costing_report.pdf'):
             shutil.copy2('costing_report.pdf', '../costing_report.pdf')
+        if os.path.exists('d:/source_code/folder'):
+            shutil.copy2('costing_report.pdf', 'd:/source_code/folder/Costing master report.pdf')
 
         # 2. Monthly PDFs
         months_set = set(df['Month_Year'].dropna().unique()).union(set(df['Enquiry Month_Year'].dropna().unique()))
-        month_order = ["April 2026", "May 2026", "June 2026", "July 2026", "August 2026", "September 2026", "October 2026"]
-        sorted_months = sorted(list(months_set), key=lambda x: month_order.index(x) if x in month_order else 99)
+        
+        def get_month_sort_key(m_str):
+            try:
+                return pd.Period(m_str, 'M').start_time
+            except:
+                return pd.Timestamp.max
+
+        sorted_months = sorted(list(months_set), key=get_month_sort_key)
 
         for m in sorted_months:
-            is_m = (df['Month_Year'] == m) | (df['Enquiry Month_Year'] == m)
-            if 'september' in m.lower() or 'october' in m.lower():
-                is_m = is_m | (~df['is_costing_done'])
+            try:
+                m_end = pd.Period(m, 'M').end_time
+            except:
+                m_end = pd.Timestamp.max
+
+            # Standard activity in month m OR any pending costing received on or before end of month m
+            is_m = (df['Month_Year'] == m) | (df['Enquiry Month_Year'] == m) | ((~df['is_costing_done']) & (df['Enquiry Date dt'] <= m_end))
             df_month = df[is_m].copy()
             if not df_month.empty:
                 m_slug = m.lower().replace(' ', '_')
                 html_m = generate_html_content(df_month, m)
                 out_file = f'public/reports/costing_report_{m_slug}.pdf'
                 render_and_save(page, html_m, out_file)
-                if 'september' in m.lower():
-                    dest_folder_pdf = 'd:/source_code/folder/Costing monthly september report.pdf'
+                if os.path.exists('d:/source_code/folder'):
+                    month_name_only = m.split()[0].lower()
+                    dest_folder_pdf = f'd:/source_code/folder/Costing monthly {month_name_only} report.pdf'
                     shutil.copy2(out_file, dest_folder_pdf)
                     print(f"Copied {out_file} to {dest_folder_pdf}")
 
@@ -553,6 +566,8 @@ def generate_all_pdfs():
             df_latest_week = df.head(10)
         html_latest_week = generate_html_content(df_latest_week, 'Latest Week (+ All Open Pending)')
         render_and_save(page, html_latest_week, 'public/reports/costing_report_latest_week.pdf')
+        if os.path.exists('d:/source_code/folder'):
+            shutil.copy2('public/reports/costing_report_latest_week.pdf', 'd:/source_code/folder/Costing latest week report.pdf')
 
         browser.close()
 

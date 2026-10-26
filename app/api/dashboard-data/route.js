@@ -128,9 +128,16 @@ export async function GET() {
       }
       
       const isPending = costingStatus === 'pending' || costingStatus === 'revision_in_progress' || !costingStatus;
-      if (isPending) {
-        allMonths.add('September 2026');
-        allMonths.add('October 2026');
+      if (isPending && !isNaN(enqDate.getTime())) {
+        // Roll forward pending costings across all months from enquiry date up to current/future months
+        const startMonth = new Date(enqDate.getFullYear(), enqDate.getMonth(), 1);
+        const now = new Date();
+        const endMonth = new Date(Math.max(now.getFullYear(), 2026), Math.max(now.getMonth() + 2, 11), 1);
+        const curMonth = new Date(startMonth);
+        while (curMonth <= endMonth) {
+          allMonths.add(curMonth.toLocaleString('default', { month: 'long', year: 'numeric' }));
+          curMonth.setMonth(curMonth.getMonth() + 1);
+        }
       }
 
       const formatDateStr = (val) => {

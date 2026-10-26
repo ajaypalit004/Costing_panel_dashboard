@@ -74,16 +74,20 @@ export default function Dashboard() {
   }, [leads]);
 
   const months = useMemo(() => {
-    const monthOrder = ["April 2026", "May 2026", "June 2026", "July 2026", "August 2026", "September 2026", "October 2026"];
+    const monthOrder = ["March 2026", "April 2026", "May 2026", "June 2026", "July 2026", "August 2026", "September 2026", "October 2026", "November 2026", "December 2026"];
     const mSet = new Set();
     leads.forEach(l => {
       if (l.monthYear) mSet.add(l.monthYear);
-      if (Array.isArray(l.months)) l.months.forEach(m => mSet.add(m));
     });
     const sorted = Array.from(mSet).sort((a, b) => {
       const idxA = monthOrder.indexOf(a);
       const idxB = monthOrder.indexOf(b);
       if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      const dA = new Date(Date.parse('01 ' + a));
+      const dB = new Date(Date.parse('01 ' + b));
+      if (!isNaN(dA.getTime()) && !isNaN(dB.getTime())) {
+        return dA.getTime() - dB.getTime();
+      }
       return a.localeCompare(b);
     });
     return ['All', ...sorted];
@@ -111,13 +115,14 @@ export default function Dashboard() {
       if (selectedWeek === 'LATEST') {
         // RULE: For selected week, retain ALL pending costings till date regardless of week
         matchWeek = isPending || (l.weekKey === latestWeekKey) || (Array.isArray(l.weeks) && l.weeks.includes(latestWeekKey));
-        matchMonth = selectedMonth === 'All' || isPending || (l.monthYear === selectedMonth) || (Array.isArray(l.months) && l.months.includes(selectedMonth));
+        matchMonth = selectedMonth === 'All' || (l.monthYear === selectedMonth) || (Array.isArray(l.months) && l.months.includes(selectedMonth));
       } else if (selectedWeek !== 'All') {
         // RULE: For any specific week, retain ALL pending costings till date regardless of week
         matchWeek = isPending || (l.weekKey === selectedWeek) || (Array.isArray(l.weeks) && l.weeks.includes(selectedWeek));
-        matchMonth = selectedMonth === 'All' || isPending || (l.monthYear === selectedMonth) || (Array.isArray(l.months) && l.months.includes(selectedMonth));
+        matchMonth = selectedMonth === 'All' || (l.monthYear === selectedMonth) || (Array.isArray(l.months) && l.months.includes(selectedMonth));
       } else {
-        matchMonth = selectedMonth === 'All' || (isPending && (selectedMonth === 'September 2026' || selectedMonth === 'October 2026')) || (l.monthYear === selectedMonth) || (Array.isArray(l.months) && l.months.includes(selectedMonth));
+        // RULE: For selected month, match activity month OR carried-over pending costings
+        matchMonth = selectedMonth === 'All' || (l.monthYear === selectedMonth) || (Array.isArray(l.months) && l.months.includes(selectedMonth));
       }
 
       const matchEng = selectedEngineer === 'All' || l.engineer === selectedEngineer;
