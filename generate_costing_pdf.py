@@ -209,6 +209,7 @@ def generate_html_content(df, period_label):
         'august 2026': '01-Aug-2026 to 31-Aug-2026',
         'september 2026': '01-Sep-2026 to 30-Sep-2026',
         'october 2026': '01-Oct-2026 to 31-Oct-2026',
+        'november 2026': '01-Nov-2026 to 30-Nov-2026',
     }
 
     if p_lower in month_name_to_range:
@@ -449,7 +450,11 @@ def generate_all_pdfs():
     csv_files = glob.glob('costing-report*.csv')
     
     data_path = None
-    if os.path.exists('costing-report-2026-10-17-08-48-56.csv'):
+    if os.path.exists('costing-report-2026-10-26-11-58-22.csv'):
+        data_path = 'costing-report-2026-10-26-11-58-22.csv'
+    elif os.path.exists('costing-report-2026-10-26-11-58-22.xlsx'):
+        data_path = 'costing-report-2026-10-26-11-58-22.xlsx'
+    elif os.path.exists('costing-report-2026-10-17-08-48-56.csv'):
         data_path = 'costing-report-2026-10-17-08-48-56.csv'
     elif os.path.exists('costing-report-2026-10-17-08-48-56.xlsx'):
         data_path = 'costing-report-2026-10-17-08-48-56.xlsx'
