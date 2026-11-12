@@ -450,7 +450,9 @@ def generate_all_pdfs():
     csv_files = glob.glob('costing-report*.csv')
     
     data_path = None
-    if os.path.exists('costing-report-2026-10-26-11-58-22.csv'):
+    if os.path.exists('costing-report-2026-11-12-10-20-47.csv'):
+        data_path = 'costing-report-2026-11-12-10-20-47.csv'
+    elif os.path.exists('costing-report-2026-10-26-11-58-22.csv'):
         data_path = 'costing-report-2026-10-26-11-58-22.csv'
     elif os.path.exists('costing-report-2026-10-26-11-58-22.xlsx'):
         data_path = 'costing-report-2026-10-26-11-58-22.xlsx'
